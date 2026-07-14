@@ -1,5 +1,6 @@
 import { Component, input, signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
+import { Queuer } from '@tanstack/pacer/queuer'
 import { vi } from 'vitest'
 import { injectQueuedValue } from '../../src/queuer/injectQueuedValue'
 
@@ -13,6 +14,32 @@ afterEach(() => {
 
 describe('injectQueuedValue', () => {
   describe('behaviour', () => {
+    it('accepts a plain initial value', () => {
+      const queued = TestBed.runInInjectionContext(() =>
+        injectQueuedValue('initial', {
+          wait: 0,
+        }),
+      )
+      TestBed.tick()
+      expect(queued()).toBe('initial')
+      queued.addItem('second')
+      expect(queued()).toBe('second')
+    })
+
+    it('accepts a signal as the queued value', () => {
+      const initial = signal('initial')
+      const second = signal('second')
+      const queued = TestBed.runInInjectionContext(() =>
+        injectQueuedValue(initial, {
+          wait: 0,
+        }),
+      )
+      TestBed.tick()
+      expect(queued()).toBe('initial')
+      queued.addItem(second())
+      expect(queued()).toBe('second')
+    })
+
     it('returns a queued signal with addItem and queuer', () => {
       const value = signal('initial')
       const queued = TestBed.runInInjectionContext(() =>
@@ -23,6 +50,19 @@ describe('injectQueuedValue', () => {
       expect(typeof queued).toBe('function')
       expect(queued.addItem).toBeDefined()
       expect(queued.queuer).toBeDefined()
+      expect(queued.queuer).toBeInstanceOf(Queuer)
+    })
+
+    it('exposes the selected queuer state without requiring items', () => {
+      const queued = TestBed.runInInjectionContext(() =>
+        injectQueuedValue('initial', { wait: 1000 }, (state) => ({
+          size: state.size,
+        })),
+      )
+      TestBed.tick()
+      expect(queued.queuer.state().size).toBe(0)
+      queued.addItem('second')
+      expect(queued.queuer.state().size).toBe(1)
     })
 
     it('pushes source signal value into the queue when it changes', () => {
@@ -89,6 +129,15 @@ describe('injectQueuedValue', () => {
         const fixture = TestBed.createComponent(HostComponent)
         fixture.detectChanges()
       }).not.toThrow()
+    })
+
+    it('queues the input value after initialization', () => {
+      const fixture = TestBed.createComponent(HostComponent)
+      fixture.detectChanges()
+      const child = fixture.debugElement.children[0]!
+        .componentInstance as ChildComponent
+      TestBed.tick()
+      expect(child.queued()).toBe('hello')
     })
   })
 })
