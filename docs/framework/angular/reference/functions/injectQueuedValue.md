@@ -5,84 +5,17 @@ title: injectQueuedValue
 
 # Function: injectQueuedValue()
 
-## Call Signature
-
 ```ts
 function injectQueuedValue<TValue, TSelected>(
-   value, 
-   options?, 
-selector?): QueuedValueSignal<TValue, TSelected>;
-```
-
-Defined in: [queuer/injectQueuedValue.ts:51](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L51)
-
-An Angular function that creates a queued value that processes state changes in order with an optional delay.
-This function uses injectQueuedSignal internally to manage a queue of state changes and apply them sequentially.
-
-The queued value will process changes in the order they are received, with optional delays between
-processing each change. This is useful for handling state updates that need to be processed
-in a specific order, like animations or sequential UI updates.
-
-The function returns a callable object containing:
-- `queued()`: A signal-like function that provides the current queued value
-- `queued.addItem(...)`: A method to enqueue additional values
-- `queued.queuer`: The queuer instance with control methods and state
-
-### Type Parameters
-
-#### TValue
-
-`TValue`
-
-#### TSelected
-
-`TSelected` *extends* `Pick`\<`QueuerState`\<`TValue`\>, `"items"`\> = `Pick`\<`QueuerState`\<`TValue`\>, `"items"`\>
-
-### Parameters
-
-#### value
-
-`Signal`\<`TValue`\>
-
-#### options?
-
-[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<`TValue`, `TSelected`\>
-
-#### selector?
-
-(`state`) => `TSelected`
-
-### Returns
-
-[`QueuedValueSignal`](../interfaces/QueuedValueSignal.md)\<`TValue`, `TSelected`\>
-
-### Example
-
-```ts
-const initialValue = signal('initial')
-const queued = injectQueuedValue(initialValue, {
-  wait: 500,
-  started: true,
-})
-
-// Add changes to the queue
-queued.addItem('new value')
-```
-
-## Call Signature
-
-```ts
-function injectQueuedValue<TValue, TSelected>(
-   value, 
    initialValue, 
-   options?, 
+   options,
 selector?): QueuedValueSignal<TValue, TSelected>;
 ```
 
-Defined in: [queuer/injectQueuedValue.ts:62](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L62)
+Defined in: [queuer/injectQueuedValue.ts:54](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L54)
 
 An Angular function that creates a queued value that processes state changes in order with an optional delay.
-This function uses injectQueuedSignal internally to manage a queue of state changes and apply them sequentially.
+This function uses injectQueuer internally to manage a queue of state changes and apply them sequentially.
 
 The queued value will process changes in the order they are received, with optional delays between
 processing each change. This is useful for handling state updates that need to be processed
@@ -91,44 +24,40 @@ in a specific order, like animations or sequential UI updates.
 The function returns a callable object containing:
 - `queued()`: A signal-like function that provides the current queued value
 - `queued.addItem(...)`: A method to enqueue additional values
-- `queued.queuer`: The queuer instance with control methods and state
+- `queued.queuer`: The queuer instance with control methods and the selected state signal
 
-### Type Parameters
+## Type Parameters
 
-#### TValue
-
-`TValue`
-
-#### TSelected
-
-`TSelected` *extends* `Pick`\<`QueuerState`\<`TValue`\>, `"items"`\> = `Pick`\<`QueuerState`\<`TValue`\>, `"items"`\>
-
-### Parameters
-
-#### value
-
-`Signal`\<`TValue`\>
-
-#### initialValue
+### TValue
 
 `TValue`
 
-#### options?
+### TSelected
 
-[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<`TValue`, `TSelected`\>
+`TSelected` = \{
+\}
 
-#### selector?
+## Parameters
+
+### initialValue
+
+`TValue` | `Signal`\<`TValue`\>
+
+### options
+
+[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<`TValue`, `TSelected`\> = `{}`
+
+### selector?
 
 (`state`) => `TSelected`
 
-### Returns
+## Returns
 
 [`QueuedValueSignal`](../interfaces/QueuedValueSignal.md)\<`TValue`, `TSelected`\>
 
-### Example
+## Example
 
 ```ts
-const initialValue = signal('initial')
 const queued = injectQueuedValue(initialValue, {
   wait: 500,
   started: true,

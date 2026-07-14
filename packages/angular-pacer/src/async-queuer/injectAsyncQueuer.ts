@@ -107,10 +107,10 @@ export function injectAsyncQueuer<TValue, TSelected = {}>(
   const queuer = new AsyncQueuer<TValue>(fn, mergedOptions)
   const state = injectSelector(queuer.store, selector)
 
-  const result = {
-    ...queuer,
-    state,
-  } as AngularAsyncQueuer<TValue, TSelected>
+  const result = Object.assign(queuer, { state }) as AngularAsyncQueuer<
+    TValue,
+    TSelected
+  >
 
   const destroyRef = inject(DestroyRef, { optional: true })
   destroyRef?.onDestroy(() => {

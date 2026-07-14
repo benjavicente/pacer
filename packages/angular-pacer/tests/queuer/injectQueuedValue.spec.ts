@@ -1,5 +1,6 @@
 import { Component, input, signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
+import { Queuer } from '@tanstack/pacer/queuer'
 import { vi } from 'vitest'
 import { injectQueuedValue } from '../../src/queuer/injectQueuedValue'
 
@@ -34,9 +35,9 @@ describe('injectQueuedValue', () => {
         }),
       )
       TestBed.tick()
-      expect(queued()).toBe(initial)
+      expect(queued()).toBe('initial')
       queued.addItem(second())
-      expect(queued()).toBe(second)
+      expect(queued()).toBe('second')
     })
 
     it('returns a queued signal with addItem and queuer', () => {
@@ -49,6 +50,7 @@ describe('injectQueuedValue', () => {
       expect(typeof queued).toBe('function')
       expect(queued.addItem).toBeDefined()
       expect(queued.queuer).toBeDefined()
+      expect(queued.queuer).toBeInstanceOf(Queuer)
     })
 
     it('exposes the selected queuer state without requiring items', () => {
@@ -114,7 +116,7 @@ describe('injectQueuedValue', () => {
       imports: [ChildComponent],
       template: '<pacer-test-child value="hello" />',
     })
-    class HostComponent { }
+    class HostComponent {}
 
     beforeEach(async () => {
       await TestBed.configureTestingModule({
