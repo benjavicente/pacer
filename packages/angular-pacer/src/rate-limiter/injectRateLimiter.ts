@@ -8,6 +8,7 @@ import {
   methodNames,
 } from '../utils/injectForwardMethods'
 import { injectLazy } from '../utils/injectLazy'
+import { injectInsideZone } from '../utils/zoneCompatibility'
 import { injectSelector } from '../utils/injectSelector'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
 import type { MethodMap } from '../utils/injectForwardMethods'
@@ -66,7 +67,7 @@ export interface AngularRateLimiter<
  *
  * Accepts static options or an options factory. Factories are read lazily, and signal
  * dependencies update the existing core instance. Local options override provider defaults.
- * Methods apply current options before executing and run outside Angular's zone.
+ * Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
  *
  * Pass a selector to expose reactive core state through `state()`. Without a selector,
  * `state()` returns `{}`; operations remain available on the ref.
@@ -112,6 +113,7 @@ export function injectRateLimiter<TFn extends AnyFunction, TSelected>(
   options: MaybeAccessor<AngularRateLimiterOptions<TFn>>,
   selector: (state: RateLimiterState) => TSelected | {} = () => ({}),
 ): AngularRateLimiter<TFn, TSelected | {}> {
+  const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)
   const mergedOptions = computed<AngularRateLimiterOptions<TFn>>(() => ({
@@ -120,7 +122,7 @@ export function injectRateLimiter<TFn extends AnyFunction, TSelected>(
   }))
 
   const getRateLimiter = injectLazy(
-    () => new RateLimiter<TFn>(fn, mergedOptions()),
+    () => new RateLimiter<TFn>(runFn, mergedOptions()),
     (core) => {
       const opts = mergedOptions()
       if (opts.onUnmount) {

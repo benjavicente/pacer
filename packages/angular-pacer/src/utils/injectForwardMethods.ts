@@ -1,5 +1,5 @@
 import { untracked } from '@angular/core'
-import { injectOutsideZone } from './injectOutsideZone'
+import { injectOutsideZone } from './zoneCompatibility'
 
 export type MethodKeys<T> = {
   [K in keyof T]-?: T[K] extends (...args: Array<never>) => unknown ? K : never

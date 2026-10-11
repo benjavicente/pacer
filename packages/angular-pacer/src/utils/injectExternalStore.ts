@@ -8,7 +8,7 @@ import {
   signal,
   untracked,
 } from '@angular/core'
-import { injectOutsideZone } from './injectOutsideZone'
+import { injectOutsideZone } from './zoneCompatibility'
 import type { Signal, ValueEqualityFn } from '@angular/core'
 
 export interface ExternalBinding<T> {

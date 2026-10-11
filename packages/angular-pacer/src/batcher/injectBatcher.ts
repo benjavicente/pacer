@@ -8,6 +8,7 @@ import {
   methodNames,
 } from '../utils/injectForwardMethods'
 import { injectLazy } from '../utils/injectLazy'
+import { injectInsideZone } from '../utils/zoneCompatibility'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -63,7 +64,7 @@ export interface AngularBatcher<TValue, TSelected = {}> extends Pick<
  *
  * Accepts static options or an options factory. Factories are read lazily, and signal
  * dependencies update the existing core instance. Local options override provider defaults.
- * Methods apply current options before executing and run outside Angular's zone.
+ * Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
  *
  * Pass a selector to expose reactive core state through `state()`. Without a selector,
  * `state()` returns `{}`; operations remain available on the ref.
@@ -109,6 +110,7 @@ export function injectBatcher<TValue, TSelected>(
   options: MaybeAccessor<AngularBatcherOptions<TValue>> = {},
   selector: (state: BatcherState<TValue>) => TSelected | {} = () => ({}),
 ): AngularBatcher<TValue, TSelected | {}> {
+  const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)
   const mergedOptions = computed(() => ({
@@ -117,7 +119,7 @@ export function injectBatcher<TValue, TSelected>(
   }))
 
   const getBatcher = injectLazy(
-    () => new Batcher<TValue>(fn, mergedOptions()),
+    () => new Batcher<TValue>(runFn, mergedOptions()),
     (core) => {
       const opts = mergedOptions()
       if (opts.onUnmount) {

@@ -8,6 +8,7 @@ import {
   methodNames,
 } from '../utils/injectForwardMethods'
 import { injectLazy } from '../utils/injectLazy'
+import { injectInsideZone } from '../utils/zoneCompatibility'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -67,7 +68,7 @@ export interface AngularThrottler<
  *
  * Accepts static options or an options factory. Factories are read lazily, and signal
  * dependencies update the existing core instance. Local options override provider defaults.
- * Methods apply current options before executing and run outside Angular's zone.
+ * Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
  *
  * Pass a selector to expose reactive core state through `state()`. Without a selector,
  * `state()` returns `{}`; operations remain available on the ref.
@@ -113,6 +114,7 @@ export function injectThrottler<TFn extends AnyFunction, TSelected>(
   options: MaybeAccessor<AngularThrottlerOptions<TFn>>,
   selector: (state: ThrottlerState<TFn>) => TSelected | {} = () => ({}),
 ): AngularThrottler<TFn, TSelected | {}> {
+  const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)
   const mergedOptions = computed<AngularThrottlerOptions<TFn>>(() => ({
@@ -121,7 +123,7 @@ export function injectThrottler<TFn extends AnyFunction, TSelected>(
   }))
 
   const getThrottler = injectLazy(
-    () => new Throttler<TFn>(fn, mergedOptions()),
+    () => new Throttler<TFn>(runFn, mergedOptions()),
     (core) => {
       const opts = mergedOptions()
       if (opts.onUnmount) {

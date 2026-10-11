@@ -1,5 +1,5 @@
 import { DestroyRef, inject, untracked } from '@angular/core'
-import { injectOutsideZone } from './injectOutsideZone'
+import { injectOutsideZone } from './zoneCompatibility'
 
 /** Lazily creates one instance and disposes it with its injection context. */
 export function injectLazy<T extends object>(
