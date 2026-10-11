@@ -1,4 +1,4 @@
-import { InjectionToken, inject } from '@angular/core'
+import { InjectionToken, assertInInjectionContext, inject } from '@angular/core'
 import type { Provider } from '@angular/core'
 import type { AngularAsyncBatcherOptions } from '../async-batcher/injectAsyncBatcher'
 import type { AngularAsyncDebouncerOptions } from '../async-debouncer/injectAsyncDebouncer'
@@ -78,5 +78,9 @@ export function providePacerOptions(
  * @returns The scoped default options.
  */
 export function injectPacerOptions(): PacerProviderOptions {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectPacerOptions)
+  }
+
   return inject(PACER_OPTIONS)
 }

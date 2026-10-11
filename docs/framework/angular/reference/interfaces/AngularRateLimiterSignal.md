@@ -3,7 +3,7 @@ id: AngularRateLimiterSignal
 title: AngularRateLimiterSignal
 ---
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L19)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:23](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L23)
 
 An Angular writable signal whose `set` and `update` writes share a rate limit.
 Accepted writes execute immediately; rejected writes and their updaters are
@@ -29,7 +29,7 @@ exposes a live readonly view. The `rateLimiter` attribute controls execution.
 AngularRateLimiterSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L19)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:23](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L23)
 
 An Angular writable signal whose `set` and `update` writes share a rate limit.
 Accepted writes execute immediately; rejected writes and their updaters are
@@ -80,7 +80,7 @@ WritableSignal.[SIGNAL]
 rateLimiter: AngularRateLimiter<(value) => void, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:24](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L24)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:28](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L28)
 
 The underlying Angular RateLimiter ref for controlling execution.
 

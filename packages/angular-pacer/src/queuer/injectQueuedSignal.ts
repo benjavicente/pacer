@@ -1,4 +1,8 @@
-import { linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { toAccessorSignal } from '../utils/maybeAccessor'
 import { injectQueuer } from './injectQueuer'
 import type { WritableSignal } from '@angular/core'
@@ -59,6 +63,10 @@ export function injectQueuedSignal<TValue, TSelected>(
   options: MaybeAccessor<AngularQueuerOptions<SignalWrite<TValue>>> = {},
   selector?: (state: QueuerState<SignalWrite<TValue>>) => TSelected,
 ): AngularQueuerSignal<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectQueuedSignal)
+  }
+
   const initialValueSignal = toAccessorSignal(initialValue)
   const queuedSignal = linkedSignal(() => untracked(initialValueSignal))
   const commitValue = queuedSignal.set

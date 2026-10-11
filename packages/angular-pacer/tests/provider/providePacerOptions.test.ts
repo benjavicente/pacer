@@ -206,3 +206,9 @@ it('resolves a defaults factory in its provider injection context', () => {
   })
   expect(factory).toHaveBeenCalledOnce()
 })
+
+it('names the defaults reader when called outside an injection context', () => {
+  expect(() => injectPacerOptions()).toThrowError(
+    /injectPacerOptions.*injection context/,
+  )
+})

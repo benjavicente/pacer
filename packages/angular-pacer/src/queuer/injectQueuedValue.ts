@@ -1,4 +1,10 @@
-import { computed, effect, linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { injectQueuer } from './injectQueuer'
 import type { Signal } from '@angular/core'
 import type { QueuerState } from '@tanstack/pacer/queuer'
@@ -52,6 +58,10 @@ export function injectQueuedValue<TValue, TSelected>(
   options: MaybeAccessor<AngularQueuerOptions<TValue>> = {},
   selector?: (state: QueuerState<TValue>) => TSelected,
 ): AngularQueuerValue<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectQueuedValue)
+  }
+
   const select = (state: QueuerState<TValue>) =>
     selector ? selector(state) : {}
   const computedSource = computed(source)

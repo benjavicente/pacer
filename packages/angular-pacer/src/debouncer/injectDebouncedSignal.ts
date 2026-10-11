@@ -1,4 +1,8 @@
-import { linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { toAccessorSignal } from '../utils/maybeAccessor'
 import { injectDebouncer } from './injectDebouncer'
 import type { DebouncerState } from '@tanstack/pacer/debouncer'
@@ -73,6 +77,10 @@ export function injectDebouncedSignal<TValue, TSelected>(
     state: DebouncerState<(value: SignalWrite<TValue>) => void>,
   ) => TSelected,
 ): AngularDebouncerSignal<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectDebouncedSignal)
+  }
+
   const initialValueSignal = toAccessorSignal(initialValue)
   const debouncedSignal = linkedSignal(() => untracked(initialValueSignal))
   const commitValue = debouncedSignal.set

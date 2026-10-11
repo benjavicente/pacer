@@ -1,4 +1,8 @@
-import { linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { toAccessorSignal } from '../utils/maybeAccessor'
 import { injectRateLimiter } from './injectRateLimiter'
 import type { RateLimiterState } from '@tanstack/pacer/rate-limiter'
@@ -72,6 +76,10 @@ export function injectRateLimitedSignal<TValue, TSelected>(
   >,
   selector?: (state: RateLimiterState) => TSelected,
 ): AngularRateLimiterSignal<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectRateLimitedSignal)
+  }
+
   const initialValueSignal = toAccessorSignal(initialValue)
   const rateLimitedSignal = linkedSignal(() => untracked(initialValueSignal))
   const commitValue = rateLimitedSignal.set

@@ -9,7 +9,7 @@ title: injectThrottler
 function injectThrottler<TFn>(fn, options): AngularThrottler<TFn>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:96](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L96)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:101](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L101)
 
 Creates and manages an Angular Throttler in the current injection context.
 
@@ -76,7 +76,7 @@ function injectThrottler<TFn, TSelected>(
 selector): AngularThrottler<TFn, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:107](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L107)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:112](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L112)
 
 Creates an Angular Throttler with a reactive selector result.
 

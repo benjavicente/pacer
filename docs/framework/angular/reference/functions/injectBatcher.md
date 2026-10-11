@@ -9,7 +9,7 @@ title: injectBatcher
 function injectBatcher<TValue>(fn, options?): AngularBatcher<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/batcher/injectBatcher.ts:92](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/batcher/injectBatcher.ts#L92)
+Defined in: [packages/angular-pacer/src/batcher/injectBatcher.ts:97](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/batcher/injectBatcher.ts#L97)
 
 Creates and manages an Angular Batcher in the current injection context.
 
@@ -76,7 +76,7 @@ function injectBatcher<TValue, TSelected>(
 selector): AngularBatcher<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/batcher/injectBatcher.ts:103](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/batcher/injectBatcher.ts#L103)
+Defined in: [packages/angular-pacer/src/batcher/injectBatcher.ts:108](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/batcher/injectBatcher.ts#L108)
 
 Creates an Angular Batcher with a reactive selector result.
 

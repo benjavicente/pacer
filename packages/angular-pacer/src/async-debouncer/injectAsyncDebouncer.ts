@@ -1,4 +1,9 @@
-import { computed, effect, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  untracked,
+} from '@angular/core'
 import { AsyncDebouncer } from '@tanstack/pacer/async-debouncer'
 import { shallow } from '@tanstack/store'
 import { injectPacerOptions } from '../provider/providePacerOptions'
@@ -116,6 +121,10 @@ export function injectAsyncDebouncer<TFn extends AnyAsyncFunction, TSelected>(
   options: MaybeAccessor<AngularAsyncDebouncerOptions<TFn>>,
   selector: (state: AsyncDebouncerState<TFn>) => TSelected | {} = () => ({}),
 ): AngularAsyncDebouncer<TFn, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectAsyncDebouncer)
+  }
+
   const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)

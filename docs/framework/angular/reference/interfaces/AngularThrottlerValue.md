@@ -3,7 +3,7 @@ id: AngularThrottlerValue
 title: AngularThrottlerValue
 ---
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:15](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L15)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:21](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L21)
 
 A readonly Angular value signal with its underlying utility ref.
 The `throttler` attribute exposes the underlying Throttler methods.
@@ -27,7 +27,7 @@ The `throttler` attribute exposes the underlying Throttler methods.
 AngularThrottlerValue(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:15](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L15)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:21](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L21)
 
 A readonly Angular value signal with its underlying utility ref.
 The `throttler` attribute exposes the underlying Throttler methods.
@@ -60,6 +60,6 @@ Signal.[SIGNAL]
 throttler: AngularThrottler<(value) => void, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L20)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:26](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L26)
 
 The underlying Angular Throttler ref for controlling execution.

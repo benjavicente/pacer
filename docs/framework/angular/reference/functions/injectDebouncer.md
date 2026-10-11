@@ -9,7 +9,7 @@ title: injectDebouncer
 function injectDebouncer<TFn>(fn, options): AngularDebouncer<TFn>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncer.ts:96](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncer.ts#L96)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncer.ts:101](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncer.ts#L101)
 
 Creates and manages an Angular Debouncer in the current injection context.
 
@@ -76,7 +76,7 @@ function injectDebouncer<TFn, TSelected>(
 selector): AngularDebouncer<TFn, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncer.ts:107](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncer.ts#L107)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncer.ts:112](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncer.ts#L112)
 
 Creates an Angular Debouncer with a reactive selector result.
 

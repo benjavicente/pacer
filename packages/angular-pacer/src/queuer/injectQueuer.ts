@@ -1,4 +1,9 @@
-import { computed, effect, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  untracked,
+} from '@angular/core'
 import { Queuer } from '@tanstack/pacer/queuer'
 import { shallow } from '@tanstack/store'
 import { injectPacerOptions } from '../provider/providePacerOptions'
@@ -115,6 +120,10 @@ export function injectQueuer<TValue, TSelected>(
   options: MaybeAccessor<AngularQueuerOptions<TValue>> = {},
   selector: (state: QueuerState<TValue>) => TSelected | {} = () => ({}),
 ): AngularQueuer<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectQueuer)
+  }
+
   const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)

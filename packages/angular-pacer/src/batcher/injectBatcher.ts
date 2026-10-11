@@ -1,4 +1,9 @@
-import { computed, effect, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  untracked,
+} from '@angular/core'
 import { Batcher } from '@tanstack/pacer/batcher'
 import { shallow } from '@tanstack/store'
 import { injectPacerOptions } from '../provider/providePacerOptions'
@@ -110,6 +115,10 @@ export function injectBatcher<TValue, TSelected>(
   options: MaybeAccessor<AngularBatcherOptions<TValue>> = {},
   selector: (state: BatcherState<TValue>) => TSelected | {} = () => ({}),
 ): AngularBatcher<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectBatcher)
+  }
+
   const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)

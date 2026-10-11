@@ -280,3 +280,9 @@ it('does not initialize unused options or invoke cleanup on destruction', async 
   expect(options).not.toHaveBeenCalled()
   expect(cleanup).not.toHaveBeenCalled()
 })
+
+it('names the utility when called outside an injection context', () => {
+  expect(() => injectDebouncer(() => {}, { wait: 0 })).toThrowError(
+    /injectDebouncer.*injection context/,
+  )
+})

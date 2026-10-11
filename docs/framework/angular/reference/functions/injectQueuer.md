@@ -9,7 +9,7 @@ title: injectQueuer
 function injectQueuer<TValue>(fn, options?): AngularQueuer<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:97](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L97)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:102](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L102)
 
 Creates and manages an Angular Queuer in the current injection context.
 
@@ -76,7 +76,7 @@ function injectQueuer<TValue, TSelected>(
 selector): AngularQueuer<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:108](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L108)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:113](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L113)
 
 Creates an Angular Queuer with a reactive selector result.
 

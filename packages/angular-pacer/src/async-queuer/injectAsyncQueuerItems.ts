@@ -1,5 +1,5 @@
 import { shallow } from '@tanstack/store'
-import { computed } from '@angular/core'
+import { assertInInjectionContext, computed } from '@angular/core'
 import { injectAsyncQueuer } from './injectAsyncQueuer'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
 import type { ReadonlySelected } from '../utils/internalTypes'
@@ -66,6 +66,10 @@ export function injectAsyncQueuerItems<TValue, TSelected>(
   options: MaybeAccessor<AngularAsyncQueuerOptions<TValue>> = {},
   selector?: (state: AsyncQueuerState<TValue>) => TSelected,
 ): AngularAsyncQueuerItems<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectAsyncQueuerItems)
+  }
+
   const utility = injectAsyncQueuer(fn, options, (state) => ({
     items: state.items,
     selected: selector ? selector(state) : {},

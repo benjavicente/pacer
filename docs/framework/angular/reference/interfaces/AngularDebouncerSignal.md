@@ -3,7 +3,7 @@ id: AngularDebouncerSignal
 title: AngularDebouncerSignal
 ---
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L19)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:23](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L23)
 
 An Angular writable signal whose `set` and `update` writes are debounced.
 New writes replace the pending write and restart the delay. Updaters receive
@@ -29,7 +29,7 @@ readonly view. The `debouncer` attribute controls execution.
 AngularDebouncerSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L19)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:23](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L23)
 
 An Angular writable signal whose `set` and `update` writes are debounced.
 New writes replace the pending write and restart the delay. Updaters receive
@@ -80,7 +80,7 @@ WritableSignal.[SIGNAL]
 debouncer: AngularDebouncer<(value) => void, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:24](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L24)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:28](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L28)
 
 The underlying Angular Debouncer ref for controlling execution.
 

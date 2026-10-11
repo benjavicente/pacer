@@ -1,4 +1,8 @@
-import { linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { toAccessorSignal } from '../utils/maybeAccessor'
 import { injectThrottler } from './injectThrottler'
 import type { ThrottlerState } from '@tanstack/pacer/throttler'
@@ -74,6 +78,10 @@ export function injectThrottledSignal<TValue, TSelected>(
     state: ThrottlerState<(value: SignalWrite<TValue>) => void>,
   ) => TSelected,
 ): AngularThrottlerSignal<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectThrottledSignal)
+  }
+
   const initialValueSignal = toAccessorSignal(initialValue)
   const throttledSignal = linkedSignal(() => untracked(initialValueSignal))
   const commitValue = throttledSignal.set

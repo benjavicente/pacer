@@ -1,4 +1,10 @@
-import { computed, effect, linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { injectDebouncer } from './injectDebouncer'
 import type { DebouncerState } from '@tanstack/pacer/debouncer'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -59,6 +65,10 @@ export function injectDebouncedValue<TValue, TSelected>(
   options: MaybeAccessor<AngularDebouncerOptions<(value: TValue) => void>>,
   selector?: (state: DebouncerState<(value: TValue) => void>) => TSelected,
 ): AngularDebouncerValue<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectDebouncedValue)
+  }
+
   const select = (state: DebouncerState<(value: TValue) => void>) =>
     selector ? selector(state) : {}
   const sourceValue = computed(signalToDebounce)

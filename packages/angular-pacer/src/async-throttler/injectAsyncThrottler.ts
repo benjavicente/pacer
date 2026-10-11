@@ -1,4 +1,9 @@
-import { computed, effect, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  untracked,
+} from '@angular/core'
 import { AsyncThrottler } from '@tanstack/pacer/async-throttler'
 import { shallow } from '@tanstack/store'
 import { injectPacerOptions } from '../provider/providePacerOptions'
@@ -116,6 +121,10 @@ export function injectAsyncThrottler<TFn extends AnyAsyncFunction, TSelected>(
   options: MaybeAccessor<AngularAsyncThrottlerOptions<TFn>>,
   selector: (state: AsyncThrottlerState<TFn>) => TSelected | {} = () => ({}),
 ): AngularAsyncThrottler<TFn, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectAsyncThrottler)
+  }
+
   const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)

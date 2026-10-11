@@ -9,7 +9,7 @@ title: injectThrottledValue
 function injectThrottledValue<TValue>(source, options): AngularThrottlerValue<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:44](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L44)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:50](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L50)
 
 Creates an Angular throttled view of a source signal.
 
@@ -64,7 +64,7 @@ function injectThrottledValue<TValue, TSelected>(
 selector): AngularThrottlerValue<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:52](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L52)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledValue.ts:58](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledValue.ts#L58)
 
 Creates the value signal with selected state on its attached utility ref.
 

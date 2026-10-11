@@ -9,7 +9,7 @@ title: injectQueuedValue
 function injectQueuedValue<TValue>(source, options?): AngularQueuerValue<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:37](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L37)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:43](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L43)
 
 Creates an Angular queued view of a source accessor.
 
@@ -62,7 +62,7 @@ function injectQueuedValue<TValue, TSelected>(
 selector): AngularQueuerValue<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:45](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L45)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:51](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L51)
 
 Creates the queued value signal with selected state on its attached queuer.
 

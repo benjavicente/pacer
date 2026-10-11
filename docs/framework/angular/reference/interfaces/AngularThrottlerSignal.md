@@ -3,7 +3,7 @@ id: AngularThrottlerSignal
 title: AngularThrottlerSignal
 ---
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L20)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:24](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L24)
 
 An Angular writable signal whose `set` and `update` writes are throttled.
 Leading writes may execute immediately; later writes replace the pending
@@ -30,7 +30,7 @@ The `throttler` attribute controls execution.
 AngularThrottlerSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L20)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:24](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L24)
 
 An Angular writable signal whose `set` and `update` writes are throttled.
 Leading writes may execute immediately; later writes replace the pending
@@ -82,7 +82,7 @@ WritableSignal.[SIGNAL]
 throttler: AngularThrottler<(value) => void, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:25](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L25)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:29](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L29)
 
 The underlying Angular Throttler ref for controlling execution.
 

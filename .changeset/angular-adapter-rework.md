@@ -27,3 +27,6 @@ Keep core scheduling outside NgZone while running the provided processing functi
 Allow `providePacerOptions` to accept a defaults factory evaluated in its injection context.
 
 Rename reflected helpers from `*Computed` to `*Value`, align Queuer Items source filenames with their APIs, and update examples and guides.
+
+Name the public utility in development errors for calls outside an injection
+context, with assertions guarded by `ngDevMode` for production removal.

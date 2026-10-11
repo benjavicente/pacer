@@ -1,4 +1,10 @@
-import { computed, effect, linkedSignal, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  linkedSignal,
+  untracked,
+} from '@angular/core'
 import { injectThrottler } from './injectThrottler'
 import type { ThrottlerState } from '@tanstack/pacer/throttler'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -59,6 +65,10 @@ export function injectThrottledValue<TValue, TSelected>(
   options: MaybeAccessor<AngularThrottlerOptions<(value: TValue) => void>>,
   selector?: (state: ThrottlerState<(value: TValue) => void>) => TSelected,
 ): AngularThrottlerValue<TValue, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectThrottledValue)
+  }
+
   const select = (state: ThrottlerState<(value: TValue) => void>) =>
     selector ? selector(state) : {}
   const sourceValue = computed(source)

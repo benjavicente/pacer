@@ -1,4 +1,9 @@
-import { computed, effect, untracked } from '@angular/core'
+import {
+  assertInInjectionContext,
+  computed,
+  effect,
+  untracked,
+} from '@angular/core'
 import { RateLimiter } from '@tanstack/pacer/rate-limiter'
 import { shallow } from '@tanstack/store'
 import { injectPacerOptions } from '../provider/providePacerOptions'
@@ -113,6 +118,10 @@ export function injectRateLimiter<TFn extends AnyFunction, TSelected>(
   options: MaybeAccessor<AngularRateLimiterOptions<TFn>>,
   selector: (state: RateLimiterState) => TSelected | {} = () => ({}),
 ): AngularRateLimiter<TFn, TSelected | {}> {
+  if (typeof ngDevMode === 'undefined' || ngDevMode) {
+    assertInInjectionContext(injectRateLimiter)
+  }
+
   const runFn = injectInsideZone(fn)
   const baseOptions = injectPacerOptions()
   const optionsSignal = toAccessorSignal(options)

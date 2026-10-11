@@ -3,7 +3,7 @@ id: AngularThrottler
 title: AngularThrottler
 ---
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:54](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L54)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:59](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L59)
 
 An Angular Throttler ref with stable core methods and readonly selected state.
 Read `state()` to observe the selector result; without a selector it returns `{}`.
@@ -31,6 +31,6 @@ Read `state()` to observe the selector result; without a selector it returns `{}
 readonly state: Signal<ReadonlySelected<TSelected>>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:59](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L59)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:64](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L64)
 
 The readonly selector result. Returns an empty object when no selector is supplied.

@@ -3,7 +3,7 @@ id: AngularQueuerSignal
 title: AngularQueuerSignal
 ---
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L16)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L20)
 
 An Angular writable signal whose `set` and `update` writes are queued in order.
 Updaters receive the committed value when their queue item executes.
@@ -29,7 +29,7 @@ processing and exposes selected queue state.
 AngularQueuerSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L16)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L20)
 
 An Angular writable signal whose `set` and `update` writes are queued in order.
 Updaters receive the committed value when their queue item executes.
@@ -80,7 +80,7 @@ WritableSignal.[SIGNAL]
 queuer: AngularQueuer<SignalWrite<TValue>, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:21](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L21)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:25](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L25)
 
 The underlying Angular Queuer ref and its selected state.
 

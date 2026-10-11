@@ -9,7 +9,7 @@ title: injectQueuedSignal
 function injectQueuedSignal<TValue>(initialValue, options?): AngularQueuerSignal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:44](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L44)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:48](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L48)
 
 Creates an Angular queued editable signal.
 
@@ -62,7 +62,7 @@ function injectQueuedSignal<TValue, TSelected>(
 selector): AngularQueuerSignal<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:52](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L52)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:56](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L56)
 
 Creates the queued value signal with selected state on its attached queuer.
 

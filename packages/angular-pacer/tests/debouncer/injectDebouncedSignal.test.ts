@@ -189,3 +189,9 @@ it('implements the writable signal contract with a live readonly view', () => {
   value.debouncer.flush()
   expect(readonlyValue()).toBe(1)
 })
+
+it('names the signal helper when called outside an injection context', () => {
+  expect(() => injectDebouncedSignal(0, { wait: 0 })).toThrowError(
+    /injectDebouncedSignal.*injection context/,
+  )
+})

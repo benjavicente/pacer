@@ -9,7 +9,7 @@ title: injectDebouncedValue
 function injectDebouncedValue<TValue>(signalToDebounce, options): AngularDebouncerValue<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedValue.ts:44](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedValue.ts#L44)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedValue.ts:50](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedValue.ts#L50)
 
 Creates an Angular debounced view of a source signal.
 
@@ -64,7 +64,7 @@ function injectDebouncedValue<TValue, TSelected>(
 selector): AngularDebouncerValue<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedValue.ts:52](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedValue.ts#L52)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedValue.ts:58](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedValue.ts#L58)
 
 Creates the value signal with selected state on its attached utility ref.
 

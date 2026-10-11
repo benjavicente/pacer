@@ -3,7 +3,7 @@ id: AngularQueuerValue
 title: AngularQueuerValue
 ---
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:9](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L9)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:15](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L15)
 
 A processed-value signal with its underlying queue controls.
 
@@ -26,7 +26,7 @@ A processed-value signal with its underlying queue controls.
 AngularQueuerValue(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:9](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L9)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:15](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L15)
 
 A processed-value signal with its underlying queue controls.
 
@@ -58,6 +58,6 @@ Signal.[SIGNAL]
 queuer: AngularQueuer<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:14](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L14)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedValue.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedValue.ts#L20)
 
 The underlying Angular Queuer ref and its selected state.

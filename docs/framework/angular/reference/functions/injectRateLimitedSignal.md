@@ -9,7 +9,7 @@ title: injectRateLimitedSignal
 function injectRateLimitedSignal<TValue>(initialValue, options): AngularRateLimiterSignal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:51](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L51)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:55](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L55)
 
 Creates an Angular ratelimited editable signal.
 
@@ -64,7 +64,7 @@ function injectRateLimitedSignal<TValue, TSelected>(
 selector): AngularRateLimiterSignal<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:61](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L61)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:65](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L65)
 
 Creates the value signal with selected state on its attached utility ref.
 
