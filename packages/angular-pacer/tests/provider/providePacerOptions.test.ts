@@ -1,10 +1,20 @@
-import { Component, computed, input, signal } from '@angular/core'
+import {
+  Component,
+  InjectionToken,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { Debouncer } from '@tanstack/pacer/debouncer'
 import { render } from '@testing-library/angular'
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest'
 import { injectDebouncer } from '../../src/debouncer/injectDebouncer'
-import { providePacerOptions } from '../../src/provider/providePacerOptions'
+import {
+  injectPacerOptions,
+  providePacerOptions,
+} from '../../src/provider/providePacerOptions'
 
 it('types provider cleanup callbacks as core instances', () => {
   TestBed.configureTestingModule({
@@ -179,4 +189,20 @@ describe('provider defaults', () => {
       }
     },
   )
+})
+
+it('resolves a defaults factory in its provider injection context', () => {
+  const wait = new InjectionToken<number>('wait')
+  const factory = vi.fn(() => ({ debouncer: { wait: inject(wait) } }))
+  TestBed.configureTestingModule({
+    providers: [{ provide: wait, useValue: 25 }, providePacerOptions(factory)],
+  })
+  expect(factory).not.toHaveBeenCalled()
+  expect(TestBed.runInInjectionContext(injectPacerOptions)).toEqual({
+    debouncer: { wait: 25 },
+  })
+  expect(TestBed.runInInjectionContext(injectPacerOptions)).toEqual({
+    debouncer: { wait: 25 },
+  })
+  expect(factory).toHaveBeenCalledOnce()
 })

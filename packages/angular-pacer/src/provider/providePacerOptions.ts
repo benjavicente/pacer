@@ -52,7 +52,7 @@ const PACER_OPTIONS = new InjectionToken<PacerProviderOptions>(
  * provider supplies the defaults; local utility options take precedence. A nested
  * provider replaces the outer defaults rather than merging scopes.
  *
- * @param options Partial default options grouped by utility.
+ * @param options Partial default options grouped by utility, or an injection-context factory.
  * @returns An Angular provider for the supplied defaults.
  *
  * @example
@@ -64,11 +64,12 @@ const PACER_OPTIONS = new InjectionToken<PacerProviderOptions>(
  * }
  * ```
  */
-export function providePacerOptions(options: PacerProviderOptions): Provider {
-  return {
-    provide: PACER_OPTIONS,
-    useValue: options,
-  }
+export function providePacerOptions(
+  options: PacerProviderOptions | (() => PacerProviderOptions),
+): Provider {
+  return typeof options === 'function'
+    ? { provide: PACER_OPTIONS, useFactory: options }
+    : { provide: PACER_OPTIONS, useValue: options }
 }
 
 /**

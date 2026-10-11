@@ -17,3 +17,5 @@ Expose editable helpers as Angular writable signals with paced `set` and `update
 Dispose lazily created instances on owner destruction, including work started before the first effect, without constructing unused instances during cleanup.
 
 Keep core scheduling outside NgZone while running the provided processing function inside NgZone, so plain component field updates render in zone-based applications.
+
+Allow `providePacerOptions` to accept a defaults factory evaluated in its injection context.
