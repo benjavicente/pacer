@@ -15,33 +15,29 @@ it('returns an Angular signal with a callable throttler attribute', () => {
   TestBed.tick()
   source.set('updated')
   TestBed.tick()
-  expect(value()).toBe('initial')
+  expect(value()).toBe('updated')
   value.throttler.flush()
   expect(value()).toBe('updated')
 })
 
-it('applies the latest source change at the original throttle deadline', () => {
+it('keeps the leading edge available for the first real source change', () => {
   vi.useFakeTimers()
   const source = signal('initial')
   const value = TestBed.runInInjectionContext(() =>
     injectThrottledComputed(source, { wait: 100 }),
   )
   TestBed.tick()
-  vi.advanceTimersByTime(20)
-  source.set('first trailing')
+  source.set('first leading')
   TestBed.tick()
+  expect(value()).toBe('first leading')
   vi.advanceTimersByTime(40)
   source.set('latest trailing')
   TestBed.tick()
-  expect(value()).toBe('initial')
-  vi.advanceTimersByTime(39)
-  expect(value()).toBe('initial')
+  expect(value()).toBe('first leading')
+  vi.advanceTimersByTime(59)
+  expect(value()).toBe('first leading')
   vi.advanceTimersByTime(1)
   expect(value()).toBe('latest trailing')
-  vi.advanceTimersByTime(100)
-  source.set('next leading')
-  TestBed.tick()
-  expect(value()).toBe('next leading')
 })
 
 it('passes selected state through to the attached utility', () => {

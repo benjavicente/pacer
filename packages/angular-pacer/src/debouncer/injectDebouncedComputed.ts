@@ -1,4 +1,4 @@
-import { effect, linkedSignal, untracked } from '@angular/core'
+import { computed, effect, linkedSignal, untracked } from '@angular/core'
 import { injectDebouncer } from './injectDebouncer'
 import type { DebouncerState } from '@tanstack/pacer/debouncer'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -61,14 +61,21 @@ export function injectDebouncedComputed<TValue, TSelected>(
 ): AngularDebouncerComputed<TValue, TSelected | {}> {
   const select = (state: DebouncerState<(value: TValue) => void>) =>
     selector ? selector(state) : {}
-  const debouncedSignal = linkedSignal(() => untracked(signalToDebounce))
+  const sourceValue = computed(signalToDebounce)
+  const debouncedSignal = linkedSignal(() => untracked(sourceValue))
   const debouncer = injectDebouncer(
     (value: TValue) => debouncedSignal.set(value),
     options,
     select,
   )
+  let initialized = false
   effect(() => {
-    debouncer.maybeExecute(signalToDebounce())
+    const value = sourceValue()
+    if (!initialized) {
+      initialized = true
+      if (Object.is(untracked(debouncedSignal), value)) return
+    }
+    debouncer.maybeExecute(value)
   })
   return Object.assign(debouncedSignal.asReadonly(), {
     debouncer,

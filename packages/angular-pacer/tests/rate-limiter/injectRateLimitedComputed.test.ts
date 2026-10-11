@@ -13,7 +13,6 @@ it('returns an Angular signal with a callable rateLimiter attribute', () => {
   expect(value()).toBe('initial')
   expect(value).toHaveProperty('rateLimiter')
   TestBed.tick()
-  value.rateLimiter.reset()
   source.set('updated')
   TestBed.tick()
   expect(value()).toBe('updated')
@@ -23,7 +22,7 @@ it('limits source updates and discards rejected values instead of replaying them
   vi.useFakeTimers()
   const source = signal('initial')
   const value = TestBed.runInInjectionContext(() =>
-    injectRateLimitedComputed(source, { limit: 2, window: 100 }),
+    injectRateLimitedComputed(source, { limit: 1, window: 100 }),
   )
   TestBed.tick()
   source.set('accepted')

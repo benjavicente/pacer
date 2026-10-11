@@ -1,4 +1,4 @@
-import { effect, linkedSignal, untracked } from '@angular/core'
+import { computed, effect, linkedSignal, untracked } from '@angular/core'
 import { injectThrottler } from './injectThrottler'
 import type { ThrottlerState } from '@tanstack/pacer/throttler'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -22,7 +22,7 @@ export interface AngularThrottlerComputed<
 /**
  * Creates an Angular throttled view of a source signal.
  *
- * The initial source value is available on first read. An effect passes source values to the throttler, including the initial value. Later changes replace the pending trailing value without restarting the interval.
+ * The initial source value is available on first read. The unchanged initial value does not enter the throttler. An effect passes subsequent source changes to the throttler; later changes replace the pending trailing value without restarting the interval.
  *
  * The returned value is a real Angular signal with the underlying utility exposed
  * on `throttler`. Options accept a static object or reactive factory and follow
@@ -61,14 +61,21 @@ export function injectThrottledComputed<TValue, TSelected>(
 ): AngularThrottlerComputed<TValue, TSelected | {}> {
   const select = (state: ThrottlerState<(value: TValue) => void>) =>
     selector ? selector(state) : {}
-  const throttledSignal = linkedSignal(() => untracked(source))
+  const sourceValue = computed(source)
+  const throttledSignal = linkedSignal(() => untracked(sourceValue))
   const throttler = injectThrottler(
     (value: TValue) => throttledSignal.set(value),
     options,
     select,
   )
+  let initialized = false
   effect(() => {
-    throttler.maybeExecute(source())
+    const value = sourceValue()
+    if (!initialized) {
+      initialized = true
+      if (Object.is(untracked(throttledSignal), value)) return
+    }
+    throttler.maybeExecute(value)
   })
   return Object.assign(throttledSignal.asReadonly(), {
     throttler,

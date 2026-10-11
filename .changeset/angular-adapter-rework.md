@@ -9,3 +9,5 @@ per-utility Angular behavior tests.
 
 Support Angular 20 and up, including all Angular LTS versions, using stable public
 signal, effect, and pending-task APIs.
+
+Avoid processing an unchanged initial source value in debounced, throttled, and rate-limited reflected helpers, preserving stability and capacity for real changes.

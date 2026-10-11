@@ -1,4 +1,4 @@
-import { effect, linkedSignal, untracked } from '@angular/core'
+import { computed, effect, linkedSignal, untracked } from '@angular/core'
 import { injectRateLimiter } from './injectRateLimiter'
 import type { RateLimiterState } from '@tanstack/pacer/rate-limiter'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
@@ -22,7 +22,7 @@ export interface AngularRateLimiterComputed<
 /**
  * Creates an Angular ratelimited view of a source signal.
  *
- * The initial source value is available on first read. An effect passes source values to the rate limiter, including the initial value. Excess updates are discarded; the end of a window does not replay rejected values.
+ * The initial source value is available on first read. The unchanged initial value does not consume capacity. An effect passes subsequent source changes to the rate limiter. Excess updates are discarded; the end of a window does not replay rejected values.
  *
  * The returned value is a real Angular signal with the underlying utility exposed
  * on `rateLimiter`. Options accept a static object or reactive factory and follow
@@ -60,14 +60,21 @@ export function injectRateLimitedComputed<TValue, TSelected>(
   selector?: (state: RateLimiterState) => TSelected,
 ): AngularRateLimiterComputed<TValue, TSelected | {}> {
   const select = (state: RateLimiterState) => (selector ? selector(state) : {})
-  const rateLimitedSignal = linkedSignal(() => untracked(source))
+  const sourceValue = computed(source)
+  const rateLimitedSignal = linkedSignal(() => untracked(sourceValue))
   const rateLimiter = injectRateLimiter(
     (value: TValue) => rateLimitedSignal.set(value),
     options,
     select,
   )
+  let initialized = false
   effect(() => {
-    rateLimiter.maybeExecute(source())
+    const value = sourceValue()
+    if (!initialized) {
+      initialized = true
+      if (Object.is(untracked(rateLimitedSignal), value)) return
+    }
+    rateLimiter.maybeExecute(value)
   })
   return Object.assign(rateLimitedSignal.asReadonly(), {
     rateLimiter,

@@ -1,4 +1,4 @@
-import { isSignal, signal } from '@angular/core'
+import { ApplicationRef, isSignal, signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { expect, expectTypeOf, it, vi } from 'vitest'
 import { injectDebouncedComputed } from '../../src/debouncer/injectDebouncedComputed'
@@ -64,4 +64,33 @@ it('passes selected state through to the attached utility', () => {
   value.debouncer.flush()
   expect(value()).toBe('updated')
   expect(value.debouncer.state().count).toBe(before + 1)
+})
+
+it('does not hold stability for an unchanged initial value', async () => {
+  const source = signal('initial')
+  const value = TestBed.runInInjectionContext(() =>
+    injectDebouncedComputed(
+      () => ({ message: source() }),
+      { wait: 1000 },
+      (state) => state.isPending,
+    ),
+  )
+  TestBed.tick()
+  expect(value()).toEqual({ message: 'initial' })
+  expect(value.debouncer.state()).toBe(false)
+  await TestBed.inject(ApplicationRef).whenStable()
+})
+
+it('paces a source change observed before the first effect', () => {
+  vi.useFakeTimers()
+  const source = signal('initial')
+  const value = TestBed.runInInjectionContext(() =>
+    injectDebouncedComputed(source, { wait: 100 }),
+  )
+  expect(value()).toBe('initial')
+  source.set('updated')
+  TestBed.tick()
+  expect(value()).toBe('initial')
+  vi.advanceTimersByTime(100)
+  expect(value()).toBe('updated')
 })
