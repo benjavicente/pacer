@@ -1,22 +1,24 @@
-import { linkedSignal } from '@angular/core'
+import { linkedSignal, untracked } from '@angular/core'
 import { toAccessorSignal } from '../utils/maybeAccessor'
 import { injectQueuer } from './injectQueuer'
-import type { Signal } from '@angular/core'
+import type { WritableSignal } from '@angular/core'
 import type { QueuerState } from '@tanstack/pacer/queuer'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { SignalWrite } from '../utils/internalTypes'
 import type { AngularQueuer, AngularQueuerOptions } from './injectQueuer'
 
-/** A processed-value signal with its underlying queue controls. */
+/**
+ * An Angular writable signal whose `set` and `update` writes are queued in order.
+ * Updaters receive the committed value when their queue item executes.
+ * `asReadonly()` exposes a live readonly view. The `queuer` attribute controls
+ * processing and exposes selected queue state.
+ */
 export interface AngularQueuerSignal<
   TValue,
   TSelected = {},
-> extends Signal<TValue> {
-  /** Enqueues a replacement value. */
-  set: (value: TValue) => void
-  /** Enqueues an updater evaluated against the committed value when processed. */
-  update: (updater: (previous: TValue) => TValue) => void
+> extends WritableSignal<TValue> {
   /** The underlying Angular Queuer ref and its selected state. */
-  queuer: AngularQueuer<() => void, TSelected>
+  queuer: AngularQueuer<SignalWrite<TValue>, TSelected>
 }
 
 /**
@@ -29,7 +31,7 @@ export interface AngularQueuerSignal<
  *
  * @param initialValue The initial committed value.
  * @param options Core queue options or a reactive options factory.
- * @returns The processed-value signal with its queuer attached.
+ * @returns The writable processed-value signal with its queuer attached.
  *
  * @example
  * ```ts
@@ -41,7 +43,7 @@ export interface AngularQueuerSignal<
  */
 export function injectQueuedSignal<TValue>(
   initialValue: MaybeAccessor<TValue>,
-  options?: MaybeAccessor<AngularQueuerOptions<() => void>>,
+  options?: MaybeAccessor<AngularQueuerOptions<SignalWrite<TValue>>>,
 ): AngularQueuerSignal<TValue>
 /**
  * Creates the queued value signal with selected state on its attached queuer.
@@ -49,24 +51,36 @@ export function injectQueuedSignal<TValue>(
  */
 export function injectQueuedSignal<TValue, TSelected>(
   initialValue: MaybeAccessor<TValue>,
-  options: MaybeAccessor<AngularQueuerOptions<() => void>>,
-  selector: (state: QueuerState<() => void>) => TSelected,
+  options: MaybeAccessor<AngularQueuerOptions<SignalWrite<TValue>>>,
+  selector: (state: QueuerState<SignalWrite<TValue>>) => TSelected,
 ): AngularQueuerSignal<TValue, TSelected>
 export function injectQueuedSignal<TValue, TSelected>(
   initialValue: MaybeAccessor<TValue>,
-  options: MaybeAccessor<AngularQueuerOptions<() => void>> = {},
-  selector?: (state: QueuerState<() => void>) => TSelected,
+  options: MaybeAccessor<AngularQueuerOptions<SignalWrite<TValue>>> = {},
+  selector?: (state: QueuerState<SignalWrite<TValue>>) => TSelected,
 ): AngularQueuerSignal<TValue, TSelected | {}> {
-  const queuedSignal = linkedSignal(toAccessorSignal(initialValue))
+  const initialValueSignal = toAccessorSignal(initialValue)
+  const queuedSignal = linkedSignal(() => untracked(initialValueSignal))
+  const commitValue = queuedSignal.set
   const queuer = injectQueuer(
-    (callback: () => void) => callback(),
+    (value: SignalWrite<TValue>) => {
+      commitValue(
+        typeof value === 'function'
+          ? (value as (previous: TValue) => TValue)(queuedSignal())
+          : value,
+      )
+    },
     options,
     (state) => (selector ? selector(state) : {}),
   )
-  return Object.assign(queuedSignal.asReadonly(), {
-    set: (value: TValue) => queuer.addItem(() => queuedSignal.set(value)),
-    update: (updater: (previous: TValue) => TValue) =>
-      queuer.addItem(() => queuedSignal.update(updater)),
+  return Object.assign(queuedSignal, {
+    set: (value: TValue) =>
+      queuer.addItem(
+        (typeof value === 'function'
+          ? () => value
+          : value) as SignalWrite<TValue>,
+      ),
+    update: (updater: (previous: TValue) => TValue) => queuer.addItem(updater),
     queuer,
   })
 }

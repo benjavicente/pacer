@@ -11,3 +11,5 @@ Support Angular 20 and up, including all Angular LTS versions, using stable publ
 signal, effect, and pending-task APIs.
 
 Avoid processing an unchanged initial source value in debounced, throttled, and rate-limited reflected helpers, preserving stability and capacity for real changes.
+
+Expose editable helpers as Angular writable signals with paced `set` and `update`, a live `asReadonly()` view, and type-safe function-valued data. Updaters use the committed value when processed.

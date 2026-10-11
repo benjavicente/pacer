@@ -1,5 +1,5 @@
 import { injectExternalStore } from './injectExternalStore'
-import type { ReadonlySelected } from './readonlySelected'
+import type { ReadonlySelected } from './internalTypes'
 import type { Readable } from '@tanstack/store'
 import type { Signal, ValueEqualityFn } from '@angular/core'
 

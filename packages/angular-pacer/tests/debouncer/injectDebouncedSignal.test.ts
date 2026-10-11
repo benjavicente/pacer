@@ -1,4 +1,5 @@
-import { isSignal } from '@angular/core'
+import type { Signal, WritableSignal } from '@angular/core'
+import { isSignal, signal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { expect, expectTypeOf, it, vi } from 'vitest'
 import { injectDebouncedSignal } from '../../src/debouncer/injectDebouncedSignal'
@@ -12,11 +13,10 @@ it('returns an Angular signal with the debouncer as an attribute', () => {
   expect(value()).toBe(0)
   expect(value).toHaveProperty('debouncer')
   TestBed.tick()
-  const callback = vi.fn()
-  value.debouncer.maybeExecute(callback)
-  expect(callback).not.toHaveBeenCalled()
+  value.debouncer.maybeExecute(1)
+  expect(value()).toBe(0)
   value.debouncer.flush()
-  expect(callback).toHaveBeenCalledOnce()
+  expect(value()).toBe(1)
 })
 
 it('debounces set calls until the delay after the latest value', () => {
@@ -119,7 +119,73 @@ it('preserves a function-valued initial value supplied through a factory', () =>
   expectTypeOf(value()).toEqualTypeOf<typeof fn>()
   expect(value()).toBe(fn)
   expect(value()(2)).toBe(3)
+  TestBed.tick()
+  const replacement = vi.fn((n: number) => n * 2)
+  value.set(replacement)
+  value.debouncer.flush()
+  expect(value()).toBe(replacement)
+  expect(replacement).not.toHaveBeenCalled()
+  value.update(() => fn)
+  value.debouncer.flush()
+  expect(value()).toBe(fn)
+
+  // @ts-expect-error Raw utility functions must return a value of the signal's type.
+  void (() => value.debouncer.maybeExecute(() => 2))
+  value.debouncer.maybeExecute(() => replacement)
+  value.debouncer.flush()
+  expect(value()).toBe(replacement)
+  expect(replacement).not.toHaveBeenCalled()
 
   // @ts-expect-error Function values must be wrapped to distinguish them from accessors.
   void (() => injectDebouncedSignal<typeof fn>(fn, { wait: 10 }))
+})
+
+it('exposes replacement values in the attached debouncer state', () => {
+  const value = TestBed.runInInjectionContext(() =>
+    injectDebouncedSignal('initial', { wait: 100 }, (state) => state.lastArgs),
+  )
+  TestBed.tick()
+  value.set('pending')
+  expect(value.debouncer.state()).toEqual(['pending'])
+  expect(value()).toBe('initial')
+  value.debouncer.flush()
+  expect(value()).toBe('pending')
+})
+
+it('reads the initial accessor once without resetting pending local writes', () => {
+  vi.useFakeTimers()
+  const initial = signal('a')
+  const value = TestBed.runInInjectionContext(() =>
+    injectDebouncedSignal(initial, { wait: 100 }),
+  )
+  expect(value()).toBe('a')
+  TestBed.tick()
+  value.set('local')
+  initial.set('b')
+  TestBed.tick()
+  expect(value()).toBe('a')
+  vi.advanceTimersByTime(100)
+  expect(value()).toBe('local')
+})
+
+it('implements the writable signal contract with a live readonly view', () => {
+  const value = TestBed.runInInjectionContext(() =>
+    injectDebouncedSignal(0, { wait: 0 }),
+  )
+  expectTypeOf(value).toExtend<WritableSignal<number>>()
+  expectTypeOf(value.set).parameters.toEqualTypeOf<[number]>()
+  expectTypeOf(value.update).parameters.toEqualTypeOf<
+    [(value: number) => number]
+  >()
+  const readonlyValue = value.asReadonly()
+  expectTypeOf(readonlyValue).toEqualTypeOf<Signal<number>>()
+  expect(isSignal(readonlyValue)).toBe(true)
+  expect(readonlyValue).toBe(value.asReadonly())
+  expect(readonlyValue).not.toHaveProperty('set')
+  expect(readonlyValue).not.toHaveProperty('update')
+  expect(readonlyValue()).toBe(0)
+  TestBed.tick()
+  value.set(1)
+  value.debouncer.flush()
+  expect(readonlyValue()).toBe(1)
 })

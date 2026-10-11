@@ -1,3 +1,4 @@
+import type { Signal, WritableSignal } from '@angular/core'
 import { isSignal } from '@angular/core'
 import { TestBed } from '@angular/core/testing'
 import { expect, expectTypeOf, it, vi } from 'vitest'
@@ -11,9 +12,8 @@ it('returns an Angular signal with a callable throttler attribute', () => {
   expectTypeOf(value()).toEqualTypeOf<number>()
   expect(value()).toBe(0)
   expect(value).toHaveProperty('throttler')
-  const callback = vi.fn()
-  value.throttler.maybeExecute(callback)
-  expect(callback).toHaveBeenCalledOnce()
+  value.throttler.maybeExecute(1)
+  expect(value()).toBe(1)
 })
 
 it('applies leading set immediately and the latest trailing set at the original deadline', () => {
@@ -90,4 +90,49 @@ it('passes selected state through to the attached utility', () => {
   value.throttler.flush()
   expect(value()).toBe('updated')
   expect(value.throttler.state().count).toBe(before + 1)
+})
+
+it('implements the writable signal contract with a live readonly view', () => {
+  const value = TestBed.runInInjectionContext(() =>
+    injectThrottledSignal(0, { wait: 0 }),
+  )
+  expectTypeOf(value).toExtend<WritableSignal<number>>()
+  expectTypeOf(value.set).parameters.toEqualTypeOf<[number]>()
+  expectTypeOf(value.update).parameters.toEqualTypeOf<
+    [(value: number) => number]
+  >()
+  const readonlyValue = value.asReadonly()
+  expectTypeOf(readonlyValue).toEqualTypeOf<Signal<number>>()
+  expect(isSignal(readonlyValue)).toBe(true)
+  expect(readonlyValue).toBe(value.asReadonly())
+  expect(readonlyValue).not.toHaveProperty('set')
+  expect(readonlyValue).not.toHaveProperty('update')
+  expect(readonlyValue()).toBe(0)
+  TestBed.tick()
+  value.set(1)
+  value.throttler.flush()
+  expect(readonlyValue()).toBe(1)
+})
+
+it('preserves function values through set and requires raw writes to return them', () => {
+  const fn = () => 1
+  const replacement = vi.fn(() => 2)
+  const value = TestBed.runInInjectionContext(() =>
+    injectThrottledSignal<typeof fn>(() => fn, { wait: 10 }),
+  )
+  TestBed.tick()
+  value.set(replacement)
+  value.throttler.flush()
+  expect(value()).toBe(replacement)
+  expect(replacement).not.toHaveBeenCalled()
+  value.update(() => fn)
+  value.throttler.flush()
+  expect(value()).toBe(fn)
+
+  // @ts-expect-error Raw utility functions must return a value of the signal's type.
+  void (() => value.throttler.maybeExecute(() => 2))
+  value.throttler.maybeExecute(() => replacement)
+  value.throttler.flush()
+  expect(value()).toBe(replacement)
+  expect(replacement).not.toHaveBeenCalled()
 })

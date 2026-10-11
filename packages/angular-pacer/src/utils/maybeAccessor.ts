@@ -1,6 +1,6 @@
 import { computed } from '@angular/core'
 
-type NonCallable<T> = T extends (...args: Array<never>) => unknown ? never : T
+import type { NonCallable } from './internalTypes'
 
 export type MaybeAccessor<T> = NonCallable<T> | (() => T)
 

@@ -1,41 +1,40 @@
-import { linkedSignal } from '@angular/core'
+import { linkedSignal, untracked } from '@angular/core'
 import { toAccessorSignal } from '../utils/maybeAccessor'
 import { injectDebouncer } from './injectDebouncer'
 import type { DebouncerState } from '@tanstack/pacer/debouncer'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { SignalWrite } from '../utils/internalTypes'
 import type {
   AngularDebouncer,
   AngularDebouncerOptions,
 } from './injectDebouncer'
-import type { Signal } from '@angular/core'
+import type { WritableSignal } from '@angular/core'
 
 /**
- * A readonly Angular value signal with paced `set`/`update` methods.
- * The `debouncer` attribute exposes the underlying Debouncer methods.
+ * An Angular writable signal whose `set` and `update` writes are debounced.
+ * New writes replace the pending write and restart the delay. Updaters receive
+ * the committed value when the write executes. `asReadonly()` exposes a live
+ * readonly view. The `debouncer` attribute controls execution.
  */
 export interface AngularDebouncerSignal<
   TValue,
   TSelected = {},
-> extends Signal<TValue> {
-  /** Schedules the replacement value after the debounce delay. */
-  set: (value: TValue) => void
-  /** Runs the updater with the current committed value when the write executes. */
-  update: (updateFn: (previous: TValue) => TValue) => void
+> extends WritableSignal<TValue> {
   /** The underlying Angular Debouncer ref for controlling execution. */
-  debouncer: AngularDebouncer<(callback: () => void) => void, TSelected>
+  debouncer: AngularDebouncer<(value: SignalWrite<TValue>) => void, TSelected>
 }
 /**
  * Creates an Angular debounced editable signal.
  *
  * The initial value is available synchronously. `set` and `update` debounce writes: a newer write restarts the delay and replaces the pending write. An updater runs against the committed value when the delay expires.
  *
- * The returned value is a real Angular signal with the underlying utility exposed
+ * The returned value is a real Angular writable signal with the underlying utility exposed
  * on `debouncer`. Options accept a static object or reactive factory and follow
  * {@link injectDebouncer} lifecycle and provider behavior.
  *
  * @param initialValue The initial committed value.
  * @param options Core options or a reactive options factory.
- * @returns The value signal with `set`, `update`, and a `debouncer` attribute.
+ * @returns The writable signal with `set`, `update`, `asReadonly`, and a `debouncer` attribute.
  *
  * @example
  * ```ts
@@ -49,7 +48,7 @@ export interface AngularDebouncerSignal<
 export function injectDebouncedSignal<TValue>(
   initialValue: MaybeAccessor<TValue>,
   options: MaybeAccessor<
-    AngularDebouncerOptions<(callback: () => void) => void>
+    AngularDebouncerOptions<(value: SignalWrite<TValue>) => void>
   >,
 ): AngularDebouncerSignal<TValue>
 /**
@@ -59,32 +58,44 @@ export function injectDebouncedSignal<TValue>(
 export function injectDebouncedSignal<TValue, TSelected>(
   initialValue: MaybeAccessor<TValue>,
   options: MaybeAccessor<
-    AngularDebouncerOptions<(callback: () => void) => void>
+    AngularDebouncerOptions<(value: SignalWrite<TValue>) => void>
   >,
   selector: (
-    state: DebouncerState<(callback: () => void) => void>,
+    state: DebouncerState<(value: SignalWrite<TValue>) => void>,
   ) => TSelected,
 ): AngularDebouncerSignal<TValue, TSelected>
 export function injectDebouncedSignal<TValue, TSelected>(
   initialValue: MaybeAccessor<TValue>,
   options: MaybeAccessor<
-    AngularDebouncerOptions<(callback: () => void) => void>
+    AngularDebouncerOptions<(value: SignalWrite<TValue>) => void>
   >,
   selector?: (
-    state: DebouncerState<(callback: () => void) => void>,
+    state: DebouncerState<(value: SignalWrite<TValue>) => void>,
   ) => TSelected,
 ): AngularDebouncerSignal<TValue, TSelected | {}> {
-  const debouncedSignal = linkedSignal(toAccessorSignal(initialValue))
+  const initialValueSignal = toAccessorSignal(initialValue)
+  const debouncedSignal = linkedSignal(() => untracked(initialValueSignal))
+  const commitValue = debouncedSignal.set
   const debouncer = injectDebouncer(
-    (callback: () => void) => callback(),
+    (value: SignalWrite<TValue>) => {
+      commitValue(
+        typeof value === 'function'
+          ? (value as (previous: TValue) => TValue)(debouncedSignal())
+          : value,
+      )
+    },
     options,
     (state) => (selector ? selector(state) : {}),
   )
-  return Object.assign(debouncedSignal.asReadonly(), {
+  return Object.assign(debouncedSignal, {
     set: (value: TValue) =>
-      debouncer.maybeExecute(() => debouncedSignal.set(value)),
+      debouncer.maybeExecute(
+        (typeof value === 'function'
+          ? () => value
+          : value) as SignalWrite<TValue>,
+      ),
     update: (updateFn: (prev: TValue) => TValue) =>
-      debouncer.maybeExecute(() => debouncedSignal.update(updateFn)),
+      debouncer.maybeExecute(updateFn),
     debouncer,
   })
 }

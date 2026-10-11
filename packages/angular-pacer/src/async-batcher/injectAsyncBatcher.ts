@@ -10,7 +10,7 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/readonlySelected'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
 import type { Signal } from '@angular/core'
 import type { AsyncBatcherOptions, AsyncBatcherState } from '@tanstack/pacer'
