@@ -3,14 +3,16 @@ id: AngularDebouncerSignal
 title: AngularDebouncerSignal
 ---
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L16)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L19)
 
-A readonly Angular value signal with paced `set`/`update` methods.
-The `debouncer` attribute exposes the underlying Debouncer methods.
+An Angular writable signal whose `set` and `update` writes are debounced.
+New writes replace the pending write and restart the delay. Updaters receive
+the committed value when the write executes. `asReadonly()` exposes a live
+readonly view. The `debouncer` attribute controls execution.
 
 ## Extends
 
-- `Signal`\<`TValue`\>
+- `WritableSignal`\<`TValue`\>
 
 ## Type Parameters
 
@@ -27,10 +29,12 @@ The `debouncer` attribute exposes the underlying Debouncer methods.
 AngularDebouncerSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L16)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L19)
 
-A readonly Angular value signal with paced `set`/`update` methods.
-The `debouncer` attribute exposes the underlying Debouncer methods.
+An Angular writable signal whose `set` and `update` writes are debounced.
+New writes replace the pending write and restart the delay. Updaters receive
+the committed value when the write executes. `asReadonly()` exposes a live
+readonly view. The `debouncer` attribute controls execution.
 
 ## Returns
 
@@ -38,18 +42,34 @@ The `debouncer` attribute exposes the underlying Debouncer methods.
 
 ## Properties
 
+### \[ɵWRITABLE\_SIGNAL\]
+
+```ts
+[ɵWRITABLE_SIGNAL]: TValue;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:19
+
+#### Inherited from
+
+```ts
+WritableSignal.[ɵWRITABLE_SIGNAL]
+```
+
+***
+
 ### \[SIGNAL\]
 
 ```ts
 [SIGNAL]: unknown;
 ```
 
-Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
 
 #### Inherited from
 
 ```ts
-Signal.[SIGNAL]
+WritableSignal.[SIGNAL]
 ```
 
 ***
@@ -57,24 +77,48 @@ Signal.[SIGNAL]
 ### debouncer
 
 ```ts
-debouncer: AngularDebouncer<(callback) => void, TSelected>;
+debouncer: AngularDebouncer<(value) => void, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:25](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L25)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:24](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L24)
 
 The underlying Angular Debouncer ref for controlling execution.
 
-***
+## Methods
 
-### set
+### asReadonly()
 
 ```ts
-set: (value) => void;
+asReadonly(): Signal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:21](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L21)
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:34
 
-Schedules the replacement value after the debounce delay.
+Returns a readonly version of this signal. Readonly signals can be accessed to read their value
+but can't be changed using set or update methods. The readonly signals do _not_ have
+any built-in mechanism that would prevent deep-mutation of their value.
+
+#### Returns
+
+`Signal`\<`TValue`\>
+
+#### Inherited from
+
+```ts
+WritableSignal.asReadonly
+```
+
+***
+
+### set()
+
+```ts
+set(value): void;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:23
+
+Directly set the signal to a new value, and notify any dependents.
 
 #### Parameters
 
@@ -86,24 +130,37 @@ Schedules the replacement value after the debounce delay.
 
 `void`
 
-***
-
-### update
+#### Inherited from
 
 ```ts
-update: (updateFn) => void;
+WritableSignal.set
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:23](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L23)
+***
 
-Runs the updater with the current committed value when the write executes.
+### update()
+
+```ts
+update(updateFn): void;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:28
+
+Update the value of the signal based on its current value, and
+notify any dependents.
 
 #### Parameters
 
 ##### updateFn
 
-(`previous`) => `TValue`
+(`value`) => `TValue`
 
 #### Returns
 
 `void`
+
+#### Inherited from
+
+```ts
+WritableSignal.update
+```

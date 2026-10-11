@@ -9,7 +9,7 @@ title: injectQueuer
 function injectQueuer<TValue>(fn, options?): AngularQueuer<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:96](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L96)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:97](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L97)
 
 Creates and manages an Angular Queuer in the current injection context.
 
@@ -19,7 +19,7 @@ Processes queued items in order with configurable pacing, capacity, and priority
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectQueuer<TValue, TSelected>(
 selector): AngularQueuer<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:107](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L107)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuer.ts:108](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuer.ts#L108)
 
 Creates an Angular Queuer with a reactive selector result.
 

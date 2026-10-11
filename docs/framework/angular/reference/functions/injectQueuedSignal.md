@@ -9,7 +9,7 @@ title: injectQueuedSignal
 function injectQueuedSignal<TValue>(initialValue, options?): AngularQueuerSignal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:42](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L42)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:44](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L44)
 
 Creates an Angular queued editable signal.
 
@@ -34,7 +34,7 @@ The initial committed value.
 
 #### options?
 
-`MaybeAccessor`\<[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<() => `void`\>\>
+`MaybeAccessor`\<[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<`SignalWrite`\<`TValue`\>\>\>
 
 Core queue options or a reactive options factory.
 
@@ -42,7 +42,7 @@ Core queue options or a reactive options factory.
 
 [`AngularQueuerSignal`](../interfaces/AngularQueuerSignal.md)\<`TValue`\>
 
-The processed-value signal with its queuer attached.
+The writable processed-value signal with its queuer attached.
 
 ### Example
 
@@ -62,7 +62,7 @@ function injectQueuedSignal<TValue, TSelected>(
 selector): AngularQueuerSignal<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:50](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L50)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:52](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L52)
 
 Creates the queued value signal with selected state on its attached queuer.
 
@@ -84,7 +84,7 @@ Creates the queued value signal with selected state on its attached queuer.
 
 #### options
 
-`MaybeAccessor`\<[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<() => `void`\>\>
+`MaybeAccessor`\<[`AngularQueuerOptions`](../interfaces/AngularQueuerOptions.md)\<`SignalWrite`\<`TValue`\>\>\>
 
 #### selector
 

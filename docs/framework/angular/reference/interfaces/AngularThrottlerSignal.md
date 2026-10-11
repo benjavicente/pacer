@@ -3,14 +3,17 @@ id: AngularThrottlerSignal
 title: AngularThrottlerSignal
 ---
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L16)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L20)
 
-A readonly Angular value signal with paced `set`/`update` methods.
-The `throttler` attribute exposes the underlying Throttler methods.
+An Angular writable signal whose `set` and `update` writes are throttled.
+Leading writes may execute immediately; later writes replace the pending
+trailing write without extending its deadline. Updaters receive the committed
+value when executed. `asReadonly()` exposes a live readonly view.
+The `throttler` attribute controls execution.
 
 ## Extends
 
-- `Signal`\<`TValue`\>
+- `WritableSignal`\<`TValue`\>
 
 ## Type Parameters
 
@@ -27,10 +30,13 @@ The `throttler` attribute exposes the underlying Throttler methods.
 AngularThrottlerSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L16)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:20](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L20)
 
-A readonly Angular value signal with paced `set`/`update` methods.
-The `throttler` attribute exposes the underlying Throttler methods.
+An Angular writable signal whose `set` and `update` writes are throttled.
+Leading writes may execute immediately; later writes replace the pending
+trailing write without extending its deadline. Updaters receive the committed
+value when executed. `asReadonly()` exposes a live readonly view.
+The `throttler` attribute controls execution.
 
 ## Returns
 
@@ -38,31 +44,83 @@ The `throttler` attribute exposes the underlying Throttler methods.
 
 ## Properties
 
+### \[ɵWRITABLE\_SIGNAL\]
+
+```ts
+[ɵWRITABLE_SIGNAL]: TValue;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:19
+
+#### Inherited from
+
+```ts
+WritableSignal.[ɵWRITABLE_SIGNAL]
+```
+
+***
+
 ### \[SIGNAL\]
 
 ```ts
 [SIGNAL]: unknown;
 ```
 
-Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
 
 #### Inherited from
 
 ```ts
-Signal.[SIGNAL]
+WritableSignal.[SIGNAL]
 ```
 
 ***
 
-### set
+### throttler
 
 ```ts
-set: (value) => void;
+throttler: AngularThrottler<(value) => void, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:21](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L21)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:25](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L25)
 
-Schedules the replacement value according to leading and trailing throttling options.
+The underlying Angular Throttler ref for controlling execution.
+
+## Methods
+
+### asReadonly()
+
+```ts
+asReadonly(): Signal<TValue>;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:34
+
+Returns a readonly version of this signal. Readonly signals can be accessed to read their value
+but can't be changed using set or update methods. The readonly signals do _not_ have
+any built-in mechanism that would prevent deep-mutation of their value.
+
+#### Returns
+
+`Signal`\<`TValue`\>
+
+#### Inherited from
+
+```ts
+WritableSignal.asReadonly
+```
+
+***
+
+### set()
+
+```ts
+set(value): void;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:23
+
+Directly set the signal to a new value, and notify any dependents.
 
 #### Parameters
 
@@ -74,36 +132,37 @@ Schedules the replacement value according to leading and trailing throttling opt
 
 `void`
 
-***
-
-### throttler
+#### Inherited from
 
 ```ts
-throttler: AngularThrottler<(callback) => void, TSelected>;
+WritableSignal.set
 ```
-
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:25](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L25)
-
-The underlying Angular Throttler ref for controlling execution.
 
 ***
 
-### update
+### update()
 
 ```ts
-update: (updateFn) => void;
+update(updateFn): void;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottledSignal.ts:23](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottledSignal.ts#L23)
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:28
 
-Runs the updater with the current committed value when the write executes.
+Update the value of the signal based on its current value, and
+notify any dependents.
 
 #### Parameters
 
 ##### updateFn
 
-(`previous`) => `TValue`
+(`value`) => `TValue`
 
 #### Returns
 
 `void`
+
+#### Inherited from
+
+```ts
+WritableSignal.update
+```

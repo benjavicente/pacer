@@ -9,13 +9,13 @@ title: injectRateLimitedSignal
 function injectRateLimitedSignal<TValue>(initialValue, options): AngularRateLimiterSignal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:49](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L49)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:51](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L51)
 
 Creates an Angular ratelimited editable signal.
 
 The initial value is available synchronously. `set` and `update` share the execution limit. Accepted writes apply immediately; rejected writes and their updater callbacks are discarded, not replayed later.
 
-The returned value is a real Angular signal with the underlying utility exposed
+The returned value is a real Angular writable signal with the underlying utility exposed
 on `rateLimiter`. Options accept a static object or reactive factory and follow
 [injectRateLimiter](injectRateLimiter.md) lifecycle and provider behavior.
 
@@ -35,7 +35,7 @@ The initial committed value.
 
 #### options
 
-`MaybeAccessor`\<[`AngularRateLimiterOptions`](../interfaces/AngularRateLimiterOptions.md)\<(`callback`) => `void`\>\>
+`MaybeAccessor`\<[`AngularRateLimiterOptions`](../interfaces/AngularRateLimiterOptions.md)\<(`value`) => `void`\>\>
 
 Core options or a reactive options factory.
 
@@ -43,7 +43,7 @@ Core options or a reactive options factory.
 
 [`AngularRateLimiterSignal`](../interfaces/AngularRateLimiterSignal.md)\<`TValue`\>
 
-The value signal with `set`, `update`, and a `rateLimiter` attribute.
+The writable signal with `set`, `update`, `asReadonly`, and a `rateLimiter` attribute.
 
 ### Example
 
@@ -64,7 +64,7 @@ function injectRateLimitedSignal<TValue, TSelected>(
 selector): AngularRateLimiterSignal<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:59](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L59)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts:61](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimitedSignal.ts#L61)
 
 Creates the value signal with selected state on its attached utility ref.
 
@@ -86,7 +86,7 @@ Creates the value signal with selected state on its attached utility ref.
 
 #### options
 
-`MaybeAccessor`\<[`AngularRateLimiterOptions`](../interfaces/AngularRateLimiterOptions.md)\<(`callback`) => `void`\>\>
+`MaybeAccessor`\<[`AngularRateLimiterOptions`](../interfaces/AngularRateLimiterOptions.md)\<(`value`) => `void`\>\>
 
 #### selector
 

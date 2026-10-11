@@ -15,7 +15,7 @@ Creates an Angular throttled editable signal.
 
 The initial value is available synchronously. `set` and `update` share a throttler. Leading writes may apply immediately; subsequent writes replace the pending trailing write without extending its deadline. An updater runs against the committed value when executed.
 
-The returned value is a real Angular signal with the underlying utility exposed
+The returned value is a real Angular writable signal with the underlying utility exposed
 on `throttler`. Options accept a static object or reactive factory and follow
 [injectThrottler](injectThrottler.md) lifecycle and provider behavior.
 
@@ -35,7 +35,7 @@ The initial committed value.
 
 #### options
 
-`MaybeAccessor`\<[`AngularThrottlerOptions`](../interfaces/AngularThrottlerOptions.md)\<(`callback`) => `void`\>\>
+`MaybeAccessor`\<[`AngularThrottlerOptions`](../interfaces/AngularThrottlerOptions.md)\<(`value`) => `void`\>\>
 
 Core options or a reactive options factory.
 
@@ -43,7 +43,7 @@ Core options or a reactive options factory.
 
 [`AngularThrottlerSignal`](../interfaces/AngularThrottlerSignal.md)\<`TValue`\>
 
-The value signal with `set`, `update`, and a `throttler` attribute.
+The writable signal with `set`, `update`, `asReadonly`, and a `throttler` attribute.
 
 ### Example
 
@@ -86,7 +86,7 @@ Creates the value signal with selected state on its attached utility ref.
 
 #### options
 
-`MaybeAccessor`\<[`AngularThrottlerOptions`](../interfaces/AngularThrottlerOptions.md)\<(`callback`) => `void`\>\>
+`MaybeAccessor`\<[`AngularThrottlerOptions`](../interfaces/AngularThrottlerOptions.md)\<(`value`) => `void`\>\>
 
 #### selector
 

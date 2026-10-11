@@ -43,7 +43,7 @@ Choose another utility when:
 
 ## Choose an API
 
-- `injectQueuedComputed` to queue observed source values
+- `injectQueuedValue` to queue observed source values
 - `injectQueuedSignal` to queue individual `set` and `update` operations
 - `injectQueuerItems` for a signal of pending queue items
 - `injectQueuer` for direct queue lifecycle and ordering control
@@ -84,11 +84,11 @@ Pass a third-argument selector to expose counters or running state through `queu
 
 ## Queued values
 
-`injectQueuedComputed` returns the last processed source value. It queues the initial value and subsequent values observed by Angular effects. Multiple source writes before an effect runs are observed as one change.
+`injectQueuedValue` returns the last processed source value. It queues the initial value and subsequent values observed by Angular effects. Multiple source writes before an effect runs are observed as one change.
 
 ```ts
 const source = signal('')
-const queued = injectQueuedComputed(source, { wait: 500 })
+const queued = injectQueuedValue(source, { wait: 500 })
 source.set('next')
 console.log(queued()) // Last processed value.
 ```
@@ -103,7 +103,7 @@ count.queuer.flush()
 console.log(count()) // 3
 ```
 
-Both helpers accept a selector for their attached `queuer.state()`. The editable helper queues callbacks, so its item-dependent options receive callbacks rather than the displayed value.
+Both helpers accept a selector for their attached `queuer.state()`. The editable helper queues replacement values or updater functions. Updaters are evaluated against the committed value when processed, matching the delayed setter behavior of React and Solid.
 
 ## Ordering items
 

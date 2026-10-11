@@ -9,7 +9,7 @@ title: injectRateLimiter
 function injectRateLimiter<TFn>(fn, options): AngularRateLimiter<TFn>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts:94](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts#L94)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts:95](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts#L95)
 
 Creates and manages an Angular RateLimiter in the current injection context.
 
@@ -19,7 +19,7 @@ Allows calls up to the configured limit within a fixed or sliding window. Calls 
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectRateLimiter<TFn, TSelected>(
 selector): AngularRateLimiter<TFn, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts:105](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts#L105)
+Defined in: [packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts:106](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/rate-limiter/injectRateLimiter.ts#L106)
 
 Creates an Angular RateLimiter with a reactive selector result.
 

@@ -3,7 +3,7 @@ id: AngularQueuerItems
 title: AngularQueuerItems
 ---
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedItems.ts:13](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedItems.ts#L13)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuerItems.ts:13](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuerItems.ts#L13)
 
 A readonly signal of pending queue items, with the Angular queuer attached.
 
@@ -26,7 +26,7 @@ A readonly signal of pending queue items, with the Angular queuer attached.
 AngularQueuerItems(): readonly TValue[];
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedItems.ts:13](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedItems.ts#L13)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuerItems.ts:13](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuerItems.ts#L13)
 
 A readonly signal of pending queue items, with the Angular queuer attached.
 
@@ -42,7 +42,7 @@ readonly `TValue`[]
 [SIGNAL]: unknown;
 ```
 
-Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
 
 #### Inherited from
 
@@ -58,7 +58,7 @@ Signal.[SIGNAL]
 addItem: (item, position, runOnItemsChange) => boolean;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedItems.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedItems.ts#L19)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuerItems.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuerItems.ts#L19)
 
 Shortcut for queuer.addItem, with the same arguments and return value.
 
@@ -100,6 +100,6 @@ queuer.addItem('task2', 'front');
 queuer: AngularQueuer<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedItems.ts:17](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedItems.ts#L17)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuerItems.ts:17](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuerItems.ts#L17)
 
 The underlying utility ref for adding, processing, and inspecting items.

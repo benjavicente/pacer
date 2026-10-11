@@ -969,8 +969,8 @@
               "to": "framework/angular/reference/functions/injectDebouncedSignal"
             },
             {
-              "label": "injectDebouncedComputed",
-              "to": "framework/angular/reference/functions/injectDebouncedComputed"
+              "label": "injectDebouncedValue",
+              "to": "framework/angular/reference/functions/injectDebouncedValue"
             },
             {
               "label": "injectAsyncDebouncer",
@@ -1444,8 +1444,8 @@
               "to": "framework/angular/reference/functions/injectThrottledSignal"
             },
             {
-              "label": "injectThrottledComputed",
-              "to": "framework/angular/reference/functions/injectThrottledComputed"
+              "label": "injectThrottledValue",
+              "to": "framework/angular/reference/functions/injectThrottledValue"
             },
             {
               "label": "injectAsyncThrottler",
@@ -1895,8 +1895,8 @@
               "to": "framework/angular/reference/functions/injectRateLimitedSignal"
             },
             {
-              "label": "injectRateLimitedComputed",
-              "to": "framework/angular/reference/functions/injectRateLimitedComputed"
+              "label": "injectRateLimitedValue",
+              "to": "framework/angular/reference/functions/injectRateLimitedValue"
             },
             {
               "label": "injectAsyncRateLimiter",
@@ -2358,8 +2358,8 @@
               "to": "framework/angular/reference/functions/injectQueuerItems"
             },
             {
-              "label": "injectQueuedComputed",
-              "to": "framework/angular/reference/functions/injectQueuedComputed"
+              "label": "injectQueuedValue",
+              "to": "framework/angular/reference/functions/injectQueuedValue"
             },
             {
               "label": "injectQueuedSignal",
@@ -3174,8 +3174,8 @@
               "to": "framework/angular/examples/injectDebouncedSignal"
             },
             {
-              "label": "injectDebouncedComputed",
-              "to": "framework/angular/examples/injectDebouncedComputed"
+              "label": "injectDebouncedValue",
+              "to": "framework/angular/examples/injectDebouncedValue"
             },
             {
               "label": "injectAsyncDebouncer",
@@ -3487,8 +3487,8 @@
               "to": "framework/angular/examples/injectThrottledSignal"
             },
             {
-              "label": "injectThrottledComputed",
-              "to": "framework/angular/examples/injectThrottledComputed"
+              "label": "injectThrottledValue",
+              "to": "framework/angular/examples/injectThrottledValue"
             },
             {
               "label": "injectAsyncThrottler",
@@ -3792,8 +3792,8 @@
               "to": "framework/angular/examples/injectRateLimitedSignal"
             },
             {
-              "label": "injectRateLimitedComputed",
-              "to": "framework/angular/examples/injectRateLimitedComputed"
+              "label": "injectRateLimitedValue",
+              "to": "framework/angular/examples/injectRateLimitedValue"
             },
             {
               "label": "injectAsyncRateLimiter",
@@ -4077,8 +4077,8 @@
               "to": "framework/angular/examples/injectQueuerItems"
             },
             {
-              "label": "injectQueuedComputed",
-              "to": "framework/angular/examples/injectQueuedComputed"
+              "label": "injectQueuedValue",
+              "to": "framework/angular/examples/injectQueuedValue"
             },
             {
               "label": "injectQueuedSignal",

@@ -44,7 +44,7 @@ Choose another utility when:
 
 ## Choose an API
 
-- `injectThrottledSignal` or `injectThrottledComputed` for throttled signals
+- `injectThrottledSignal` or `injectThrottledValue` for throttled signals
 - `injectThrottler` for lifecycle methods and selected state
 
 Use instance methods for event handlers, and state or value helpers for rate-controlled UI state.

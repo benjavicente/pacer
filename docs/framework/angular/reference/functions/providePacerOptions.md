@@ -19,9 +19,10 @@ provider replaces the outer defaults rather than merging scopes.
 
 ### options
 
-[`PacerProviderOptions`](../interfaces/PacerProviderOptions.md)
+  \| [`PacerProviderOptions`](../interfaces/PacerProviderOptions.md)
+  \| (() => [`PacerProviderOptions`](../interfaces/PacerProviderOptions.md))
 
-Partial default options grouped by utility.
+Partial default options grouped by utility, or an injection-context factory.
 
 ## Returns
 

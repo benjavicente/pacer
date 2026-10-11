@@ -9,7 +9,7 @@ title: injectAsyncRateLimiter
 function injectAsyncRateLimiter<TFn>(fn, options): AngularAsyncRateLimiter<TFn>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts:97](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts#L97)
+Defined in: [packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts:98](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts#L98)
 
 Creates and manages an Angular AsyncRateLimiter in the current injection context.
 
@@ -19,7 +19,7 @@ Allows asynchronous calls up to the configured limit within a fixed or sliding w
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectAsyncRateLimiter<TFn, TSelected>(
 selector): AngularAsyncRateLimiter<TFn, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts:108](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts#L108)
+Defined in: [packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts:109](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-rate-limiter/injectAsyncRateLimiter.ts#L109)
 
 Creates an Angular AsyncRateLimiter with a reactive selector result.
 

@@ -3,13 +3,16 @@ id: AngularQueuerSignal
 title: AngularQueuerSignal
 ---
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:10](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L10)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L16)
 
-A processed-value signal with its underlying queue controls.
+An Angular writable signal whose `set` and `update` writes are queued in order.
+Updaters receive the committed value when their queue item executes.
+`asReadonly()` exposes a live readonly view. The `queuer` attribute controls
+processing and exposes selected queue state.
 
 ## Extends
 
-- `Signal`\<`TValue`\>
+- `WritableSignal`\<`TValue`\>
 
 ## Type Parameters
 
@@ -26,9 +29,12 @@ A processed-value signal with its underlying queue controls.
 AngularQueuerSignal(): TValue;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:10](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L10)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:16](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L16)
 
-A processed-value signal with its underlying queue controls.
+An Angular writable signal whose `set` and `update` writes are queued in order.
+Updaters receive the committed value when their queue item executes.
+`asReadonly()` exposes a live readonly view. The `queuer` attribute controls
+processing and exposes selected queue state.
 
 ## Returns
 
@@ -36,18 +42,34 @@ A processed-value signal with its underlying queue controls.
 
 ## Properties
 
+### \[ɵWRITABLE\_SIGNAL\]
+
+```ts
+[ɵWRITABLE_SIGNAL]: TValue;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:19
+
+#### Inherited from
+
+```ts
+WritableSignal.[ɵWRITABLE_SIGNAL]
+```
+
+***
+
 ### \[SIGNAL\]
 
 ```ts
 [SIGNAL]: unknown;
 ```
 
-Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:75
 
 #### Inherited from
 
 ```ts
-Signal.[SIGNAL]
+WritableSignal.[SIGNAL]
 ```
 
 ***
@@ -55,24 +77,48 @@ Signal.[SIGNAL]
 ### queuer
 
 ```ts
-queuer: AngularQueuer<() => void, TSelected>;
+queuer: AngularQueuer<SignalWrite<TValue>, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:19](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L19)
+Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:21](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L21)
 
 The underlying Angular Queuer ref and its selected state.
 
-***
+## Methods
 
-### set
+### asReadonly()
 
 ```ts
-set: (value) => void;
+asReadonly(): Signal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:15](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L15)
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:34
 
-Enqueues a replacement value.
+Returns a readonly version of this signal. Readonly signals can be accessed to read their value
+but can't be changed using set or update methods. The readonly signals do _not_ have
+any built-in mechanism that would prevent deep-mutation of their value.
+
+#### Returns
+
+`Signal`\<`TValue`\>
+
+#### Inherited from
+
+```ts
+WritableSignal.asReadonly
+```
+
+***
+
+### set()
+
+```ts
+set(value): void;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:23
+
+Directly set the signal to a new value, and notify any dependents.
 
 #### Parameters
 
@@ -84,24 +130,37 @@ Enqueues a replacement value.
 
 `void`
 
-***
-
-### update
+#### Inherited from
 
 ```ts
-update: (updater) => void;
+WritableSignal.set
 ```
 
-Defined in: [packages/angular-pacer/src/queuer/injectQueuedSignal.ts:17](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/queuer/injectQueuedSignal.ts#L17)
+***
 
-Enqueues an updater evaluated against the committed value when processed.
+### update()
+
+```ts
+update(updateFn): void;
+```
+
+Defined in: node\_modules/.pnpm/@angular+core@22.2.1\_@angular+compiler@22.2.1\_rxjs@7.8.2\_zone.js@0.16.3/node\_modules/@angular/core/types/\_chrome\_dev\_tools\_performance-chunk.d.ts:28
+
+Update the value of the signal based on its current value, and
+notify any dependents.
 
 #### Parameters
 
-##### updater
+##### updateFn
 
-(`previous`) => `TValue`
+(`value`) => `TValue`
 
 #### Returns
 
 `void`
+
+#### Inherited from
+
+```ts
+WritableSignal.update
+```

@@ -9,7 +9,7 @@ title: injectThrottler
 function injectThrottler<TFn>(fn, options): AngularThrottler<TFn>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:95](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L95)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:96](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L96)
 
 Creates and manages an Angular Throttler in the current injection context.
 
@@ -19,7 +19,7 @@ Limits executions to the configured interval, with leading and trailing calls. L
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectThrottler<TFn, TSelected>(
 selector): AngularThrottler<TFn, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:106](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L106)
+Defined in: [packages/angular-pacer/src/throttler/injectThrottler.ts:107](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/throttler/injectThrottler.ts#L107)
 
 Creates an Angular Throttler with a reactive selector result.
 

@@ -9,7 +9,7 @@ title: injectAsyncBatcher
 function injectAsyncBatcher<TValue>(fn, options?): AngularAsyncBatcher<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts:98](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts#L98)
+Defined in: [packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts:99](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts#L99)
 
 Creates and manages an Angular AsyncBatcher in the current injection context.
 
@@ -19,7 +19,7 @@ Collects items and processes each batch asynchronously when its size or delay th
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectAsyncBatcher<TValue, TSelected>(
 selector): AngularAsyncBatcher<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts:109](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts#L109)
+Defined in: [packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts:110](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-batcher/injectAsyncBatcher.ts#L110)
 
 Creates an Angular AsyncBatcher with a reactive selector result.
 

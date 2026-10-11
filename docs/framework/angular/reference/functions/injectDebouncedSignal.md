@@ -9,13 +9,13 @@ title: injectDebouncedSignal
 function injectDebouncedSignal<TValue>(initialValue, options): AngularDebouncerSignal<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:49](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L49)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:48](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L48)
 
 Creates an Angular debounced editable signal.
 
 The initial value is available synchronously. `set` and `update` debounce writes: a newer write restarts the delay and replaces the pending write. An updater runs against the committed value when the delay expires.
 
-The returned value is a real Angular signal with the underlying utility exposed
+The returned value is a real Angular writable signal with the underlying utility exposed
 on `debouncer`. Options accept a static object or reactive factory and follow
 [injectDebouncer](injectDebouncer.md) lifecycle and provider behavior.
 
@@ -35,7 +35,7 @@ The initial committed value.
 
 #### options
 
-`MaybeAccessor`\<[`AngularDebouncerOptions`](../interfaces/AngularDebouncerOptions.md)\<(`callback`) => `void`\>\>
+`MaybeAccessor`\<[`AngularDebouncerOptions`](../interfaces/AngularDebouncerOptions.md)\<(`value`) => `void`\>\>
 
 Core options or a reactive options factory.
 
@@ -43,7 +43,7 @@ Core options or a reactive options factory.
 
 [`AngularDebouncerSignal`](../interfaces/AngularDebouncerSignal.md)\<`TValue`\>
 
-The value signal with `set`, `update`, and a `debouncer` attribute.
+The writable signal with `set`, `update`, `asReadonly`, and a `debouncer` attribute.
 
 ### Example
 
@@ -64,7 +64,7 @@ function injectDebouncedSignal<TValue, TSelected>(
 selector): AngularDebouncerSignal<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:59](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L59)
+Defined in: [packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts:58](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/debouncer/injectDebouncedSignal.ts#L58)
 
 Creates the value signal with selected state on its attached utility ref.
 
@@ -86,7 +86,7 @@ Creates the value signal with selected state on its attached utility ref.
 
 #### options
 
-`MaybeAccessor`\<[`AngularDebouncerOptions`](../interfaces/AngularDebouncerOptions.md)\<(`callback`) => `void`\>\>
+`MaybeAccessor`\<[`AngularDebouncerOptions`](../interfaces/AngularDebouncerOptions.md)\<(`value`) => `void`\>\>
 
 #### selector
 

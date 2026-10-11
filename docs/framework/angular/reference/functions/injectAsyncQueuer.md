@@ -9,7 +9,7 @@ title: injectAsyncQueuer
 function injectAsyncQueuer<TValue>(fn, options?): AngularAsyncQueuer<TValue>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts:102](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts#L102)
+Defined in: [packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts:103](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts#L103)
 
 Creates and manages an Angular AsyncQueuer in the current injection context.
 
@@ -19,7 +19,7 @@ Processes queued items asynchronously with configurable pacing and concurrency.
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectAsyncQueuer<TValue, TSelected>(
 selector): AngularAsyncQueuer<TValue, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts:113](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts#L113)
+Defined in: [packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts:114](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-queuer/injectAsyncQueuer.ts#L114)
 
 Creates an Angular AsyncQueuer with a reactive selector result.
 

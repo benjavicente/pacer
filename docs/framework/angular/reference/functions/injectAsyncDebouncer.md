@@ -9,7 +9,7 @@ title: injectAsyncDebouncer
 function injectAsyncDebouncer<TFn>(fn, options): AngularAsyncDebouncer<TFn>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts:97](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts#L97)
+Defined in: [packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts:98](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts#L98)
 
 Creates and manages an Angular AsyncDebouncer in the current injection context.
 
@@ -19,7 +19,7 @@ Waits until calls stop for the configured delay, then runs the latest asynchrono
 
 Accepts static options or an options factory. Factories are read lazily, and signal
 dependencies update the existing core instance. Local options override provider defaults.
-Methods apply current options before executing and run outside Angular's zone.
+Methods apply current options before executing and schedule work outside Angular's zone. The provided function runs inside Angular's zone.
 
 Pass a selector to expose reactive core state through `state()`. Without a selector,
 `state()` returns `{}`; operations remain available on the ref.
@@ -76,7 +76,7 @@ function injectAsyncDebouncer<TFn, TSelected>(
 selector): AngularAsyncDebouncer<TFn, TSelected>;
 ```
 
-Defined in: [packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts:108](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts#L108)
+Defined in: [packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts:109](https://github.com/TanStack/pacer/blob/main/packages/angular-pacer/src/async-debouncer/injectAsyncDebouncer.ts#L109)
 
 Creates an Angular AsyncDebouncer with a reactive selector result.
 

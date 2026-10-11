@@ -81,7 +81,7 @@ Use a sliding window when capacity should return gradually rather than all at on
 
 ## Choose an API
 
-- `injectRateLimitedSignal` or `injectRateLimitedComputed` for signals
+- `injectRateLimitedSignal` or `injectRateLimitedValue` for signals
 - `injectRateLimiter` for capacity helpers and selected state
 
 Call `maybeExecute()` for quota-controlled operations. Use state or value helpers for UI updates, and the instance for capacity helpers and rejection state.

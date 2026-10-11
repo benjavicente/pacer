@@ -47,7 +47,7 @@ Choose another utility when:
 
 ## Choose an API
 
-- `injectDebouncedSignal` or `injectDebouncedComputed` for delayed signals
+- `injectDebouncedSignal` or `injectDebouncedValue` for delayed signals
 - `injectDebouncer` for lifecycle methods and selected state
 
 Use the instance's `maybeExecute` method for event handlers, and state or value helpers for delayed UI state. Keep the instance for cancellation, flushing, selected state, and dynamic options.
