@@ -10,15 +10,15 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type {
   AnyAsyncFunction,
   AsyncDebouncerOptions,
   AsyncDebouncerState,
 } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectAsyncDebouncer}, including core configuration and Angular cleanup.
@@ -122,12 +122,21 @@ export function injectAsyncDebouncer<TFn extends AnyAsyncFunction, TSelected>(
     ...optionsSignal(),
   }))
 
-  const asyncDebouncerSignal = injectLazy(
+  const getAsyncDebouncer = injectLazy(
     () => new AsyncDebouncer<TFn>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.cancel()
+        core.abort()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    asyncDebouncerSignal,
+    getAsyncDebouncer,
     asyncDebouncerMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -136,29 +145,16 @@ export function injectAsyncDebouncer<TFn extends AnyAsyncFunction, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => asyncDebouncerSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = asyncDebouncerSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.cancel()
-        core.abort()
-      }
-    })
+    untracked(() => getAsyncDebouncer().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => asyncDebouncerSignal().store,
+    () => getAsyncDebouncer().store,
     (state) => state.isPending || state.isExecuting,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => asyncDebouncerSignal().store, selector, {
+  const state = injectSelector(() => getAsyncDebouncer().store, selector, {
     compare: shallow,
   })
 

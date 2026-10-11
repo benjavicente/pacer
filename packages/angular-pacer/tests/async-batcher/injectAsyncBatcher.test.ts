@@ -267,3 +267,22 @@ describe('signal inputs', () => {
     expect(() => fixture.destroy()).not.toThrow()
   })
 })
+
+it('aborts work started before the first effect on owner destruction', async () => {
+  const completion = Promise.withResolvers<void>()
+  @Component({ template: '' })
+  class Host {
+    utility = injectAsyncBatcher<string>(() => completion.promise, {
+      maxSize: 1,
+    })
+  }
+  const { fixture } = await render(Host, { detectChangesOnRender: false })
+  const pending = fixture.componentInstance.utility.addItem('job')
+  const abortSignal = fixture.componentInstance.utility.getAbortSignal()
+  expect(abortSignal).not.toBeNull()
+  expect(abortSignal?.aborted).toBe(false)
+  fixture.destroy()
+  expect(abortSignal?.aborted).toBe(true)
+  completion.resolve()
+  await pending
+})

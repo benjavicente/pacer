@@ -10,15 +10,15 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type {
   AnyAsyncFunction,
   AsyncThrottlerOptions,
   AsyncThrottlerState,
 } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectAsyncThrottler}, including core configuration and Angular cleanup.
@@ -122,12 +122,21 @@ export function injectAsyncThrottler<TFn extends AnyAsyncFunction, TSelected>(
     ...optionsSignal(),
   }))
 
-  const asyncThrottlerSignal = injectLazy(
+  const getAsyncThrottler = injectLazy(
     () => new AsyncThrottler<TFn>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.cancel()
+        core.abort()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    asyncThrottlerSignal,
+    getAsyncThrottler,
     asyncThrottlerMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -136,29 +145,16 @@ export function injectAsyncThrottler<TFn extends AnyAsyncFunction, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => asyncThrottlerSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = asyncThrottlerSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.cancel()
-        core.abort()
-      }
-    })
+    untracked(() => getAsyncThrottler().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => asyncThrottlerSignal().store,
+    () => getAsyncThrottler().store,
     (state) => state.isPending || state.isExecuting,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => asyncThrottlerSignal().store, selector, {
+  const state = injectSelector(() => getAsyncThrottler().store, selector, {
     compare: shallow,
   })
 

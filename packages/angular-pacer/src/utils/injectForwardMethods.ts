@@ -1,6 +1,5 @@
 import { untracked } from '@angular/core'
 import { injectOutsideZone } from './injectOutsideZone'
-import type { Signal } from '@angular/core'
 
 export type MethodKeys<T> = {
   [K in keyof T]-?: T[K] extends (...args: Array<never>) => unknown ? K : never
@@ -26,18 +25,18 @@ export function injectForwardMethods<
   TMethods extends MethodKeys<TSource>,
 >(
   /* Source of the methods */
-  source: Signal<TSource>,
+  source: () => TSource,
   /* Methods key to register */
   methods: ReadonlyArray<TMethods>,
   /* Callback to run before the method. Runs untracked and outside Angular. */
   before: (instance: TSource, method: TMethods) => void,
 ): Pick<TSource, TMethods> {
-  const outsideZone = injectOutsideZone()
+  const runOutside = injectOutsideZone()
   const result = {} as Pick<TSource, TMethods>
 
   for (const key of methods) {
     result[key] = ((...args: Array<unknown>) =>
-      outsideZone(() =>
+      runOutside(() =>
         untracked(() => {
           const instance = source()
           before(instance, key)

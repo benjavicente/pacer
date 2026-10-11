@@ -10,15 +10,15 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type {
   AnyFunction,
   ThrottlerOptions,
   ThrottlerState,
 } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectThrottler}, including core configuration and Angular cleanup.
@@ -120,12 +120,20 @@ export function injectThrottler<TFn extends AnyFunction, TSelected>(
     ...optionsSignal(),
   }))
 
-  const throttlerSignal = injectLazy(
+  const getThrottler = injectLazy(
     () => new Throttler<TFn>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.cancel()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    throttlerSignal,
+    getThrottler,
     throttlerMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -134,28 +142,16 @@ export function injectThrottler<TFn extends AnyFunction, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => throttlerSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = throttlerSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.cancel()
-      }
-    })
+    untracked(() => getThrottler().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => throttlerSignal().store,
+    () => getThrottler().store,
     (state) => state.isPending,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => throttlerSignal().store, selector, {
+  const state = injectSelector(() => getThrottler().store, selector, {
     compare: shallow,
   })
 

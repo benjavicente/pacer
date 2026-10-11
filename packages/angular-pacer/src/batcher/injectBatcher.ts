@@ -10,11 +10,11 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type { BatcherOptions, BatcherState } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectBatcher}, including core configuration and Angular cleanup.
@@ -116,42 +116,34 @@ export function injectBatcher<TValue, TSelected>(
     ...optionsSignal(),
   }))
 
-  const batcherSignal = injectLazy(
+  const getBatcher = injectLazy(
     () => new Batcher<TValue>(fn, mergedOptions()),
-  )
-
-  const methods = injectForwardMethods(
-    batcherSignal,
-    batcherMethods,
     (core) => {
-      core.setOptions(mergedOptions())
-    },
-  )
-
-  effect(() => {
-    const opts = mergedOptions()
-    untracked(() => batcherSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = batcherSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
+      const opts = mergedOptions()
       if (opts.onUnmount) {
         opts.onUnmount(core)
       } else {
         core.cancel()
       }
-    })
+    },
+  )
+
+  const methods = injectForwardMethods(getBatcher, batcherMethods, (core) => {
+    core.setOptions(mergedOptions())
+  })
+
+  effect(() => {
+    const opts = mergedOptions()
+    untracked(() => getBatcher().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => batcherSignal().store,
+    () => getBatcher().store,
     (state) => state.isPending,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => batcherSignal().store, selector, {
+  const state = injectSelector(() => getBatcher().store, selector, {
     compare: shallow,
   })
 

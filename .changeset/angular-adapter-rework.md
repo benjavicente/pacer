@@ -3,7 +3,7 @@
 ---
 
 Rebuild Angular utility adapters with lazy construction, readonly selected
-state, explicit methods, reactive options, and effect-owned cleanup. Replace the
+state, explicit methods, reactive options, and owner-bound instance cleanup. Replace the
 Angular Store dependency with core Store integration and cover the adapters with
 per-utility Angular behavior tests.
 
@@ -13,3 +13,5 @@ signal, effect, and pending-task APIs.
 Avoid processing an unchanged initial source value in debounced, throttled, and rate-limited reflected helpers, preserving stability and capacity for real changes.
 
 Expose editable helpers as Angular writable signals with paced `set` and `update`, a live `asReadonly()` view, and type-safe function-valued data. Updaters use the committed value when processed.
+
+Dispose lazily created instances on owner destruction, including work started before the first effect, without constructing unused instances during cleanup.

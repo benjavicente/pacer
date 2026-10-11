@@ -10,15 +10,15 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type {
   AnyAsyncFunction,
   AsyncRateLimiterOptions,
   AsyncRateLimiterState,
 } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectAsyncRateLimiter}, including core configuration and Angular cleanup.
@@ -122,12 +122,20 @@ export function injectAsyncRateLimiter<TFn extends AnyAsyncFunction, TSelected>(
     ...optionsSignal(),
   }))
 
-  const asyncRateLimiterSignal = injectLazy(
+  const getAsyncRateLimiter = injectLazy(
     () => new AsyncRateLimiter<TFn>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.abort()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    asyncRateLimiterSignal,
+    getAsyncRateLimiter,
     asyncRateLimiterMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -136,28 +144,16 @@ export function injectAsyncRateLimiter<TFn extends AnyAsyncFunction, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => asyncRateLimiterSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = asyncRateLimiterSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.abort()
-      }
-    })
+    untracked(() => getAsyncRateLimiter().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => asyncRateLimiterSignal().store,
+    () => getAsyncRateLimiter().store,
     (state) => state.isExecuting,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => asyncRateLimiterSignal().store, selector, {
+  const state = injectSelector(() => getAsyncRateLimiter().store, selector, {
     compare: shallow,
   })
 

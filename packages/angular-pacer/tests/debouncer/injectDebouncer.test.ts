@@ -252,3 +252,31 @@ it('holds stability until scheduled synchronous work finishes', async () => {
   expect(stability.isStable).toBe(true)
   expect(process).toHaveBeenCalledTimes(1)
 })
+
+it('cancels work started before the first effect on owner destruction', async () => {
+  vi.useFakeTimers()
+  const process = vi.fn((item: string) => item)
+  @Component({ template: '' })
+  class Host {
+    utility = injectDebouncer(process, { wait: 10 })
+  }
+  const { fixture } = await render(Host, { detectChangesOnRender: false })
+  const pending = fixture.componentInstance.utility.maybeExecute('job')
+  fixture.destroy()
+  await vi.advanceTimersByTimeAsync(10)
+  await pending
+  expect(process).not.toHaveBeenCalled()
+})
+
+it('does not initialize unused options or invoke cleanup on destruction', async () => {
+  const cleanup = vi.fn()
+  const options = vi.fn(() => ({ wait: 10, onUnmount: cleanup }))
+  @Component({ template: '' })
+  class Host {
+    utility = injectDebouncer(() => {}, options)
+  }
+  const { fixture } = await render(Host, { detectChangesOnRender: false })
+  fixture.destroy()
+  expect(options).not.toHaveBeenCalled()
+  expect(cleanup).not.toHaveBeenCalled()
+})

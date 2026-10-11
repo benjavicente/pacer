@@ -10,15 +10,15 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type {
   AnyFunction,
   DebouncerOptions,
   DebouncerState,
 } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectDebouncer}, including core configuration and Angular cleanup.
@@ -120,12 +120,20 @@ export function injectDebouncer<TFn extends AnyFunction, TSelected>(
     ...optionsSignal(),
   }))
 
-  const debouncerSignal = injectLazy(
+  const getDebouncer = injectLazy(
     () => new Debouncer<TFn>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.cancel()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    debouncerSignal,
+    getDebouncer,
     debouncerMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -134,28 +142,16 @@ export function injectDebouncer<TFn extends AnyFunction, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => debouncerSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = debouncerSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.cancel()
-      }
-    })
+    untracked(() => getDebouncer().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => debouncerSignal().store,
+    () => getDebouncer().store,
     (state) => state.isPending,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => debouncerSignal().store, selector, {
+  const state = injectSelector(() => getDebouncer().store, selector, {
     compare: shallow,
   })
 

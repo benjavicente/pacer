@@ -10,11 +10,11 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type { AsyncBatcherOptions, AsyncBatcherState } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectAsyncBatcher}, including core configuration and Angular cleanup.
@@ -125,12 +125,21 @@ export function injectAsyncBatcher<TValue, TSelected>(
     ...optionsSignal(),
   }))
 
-  const asyncBatcherSignal = injectLazy(
+  const getAsyncBatcher = injectLazy(
     () => new AsyncBatcher<TValue>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.cancel()
+        core.abort()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    asyncBatcherSignal,
+    getAsyncBatcher,
     asyncBatcherMethods,
     (asyncBatcher) => {
       asyncBatcher.setOptions(mergedOptions())
@@ -139,31 +148,17 @@ export function injectAsyncBatcher<TValue, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => asyncBatcherSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = asyncBatcherSignal()
-
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.cancel()
-        core.abort()
-      }
-    })
+    untracked(() => getAsyncBatcher().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => asyncBatcherSignal().store,
+    () => getAsyncBatcher().store,
     (state) => state.isPending || state.isExecuting,
   )
 
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => asyncBatcherSignal().store, selector, {
+  const state = injectSelector(() => getAsyncBatcher().store, selector, {
     compare: shallow,
   })
 

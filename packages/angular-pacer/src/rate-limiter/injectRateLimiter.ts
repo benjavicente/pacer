@@ -9,15 +9,15 @@ import {
 } from '../utils/injectForwardMethods'
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type {
   AnyFunction,
   RateLimiterOptions,
   RateLimiterState,
 } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectRateLimiter}, including core configuration and Angular cleanup.
@@ -119,12 +119,18 @@ export function injectRateLimiter<TFn extends AnyFunction, TSelected>(
     ...optionsSignal(),
   }))
 
-  const rateLimiterSignal = injectLazy(
+  const getRateLimiter = injectLazy(
     () => new RateLimiter<TFn>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    rateLimiterSignal,
+    getRateLimiter,
     rateLimiterMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -133,20 +139,10 @@ export function injectRateLimiter<TFn extends AnyFunction, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => rateLimiterSignal().setOptions(opts))
+    untracked(() => getRateLimiter().setOptions(opts))
   })
 
-  effect((onCleanup) => {
-    const core = rateLimiterSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      }
-    })
-  })
-
-  const state = injectSelector(() => rateLimiterSignal().store, selector, {
+  const state = injectSelector(() => getRateLimiter().store, selector, {
     compare: shallow,
   })
 

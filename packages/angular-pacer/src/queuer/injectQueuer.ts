@@ -10,11 +10,11 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type { QueuerOptions, QueuerState } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectQueuer}, including core configuration and Angular cleanup.
@@ -121,36 +121,34 @@ export function injectQueuer<TValue, TSelected>(
     ...optionsSignal(),
   }))
 
-  const queuerSignal = injectLazy(() => new Queuer<TValue>(fn, mergedOptions()))
-
-  const methods = injectForwardMethods(queuerSignal, queuerMethods, (core) => {
-    core.setOptions(mergedOptions())
-  })
-
-  effect(() => {
-    const opts = mergedOptions()
-    untracked(() => queuerSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = queuerSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
+  const getQueuer = injectLazy(
+    () => new Queuer<TValue>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
       if (opts.onUnmount) {
         opts.onUnmount(core)
       } else {
         core.stop()
       }
-    })
+    },
+  )
+
+  const methods = injectForwardMethods(getQueuer, queuerMethods, (core) => {
+    core.setOptions(mergedOptions())
+  })
+
+  effect(() => {
+    const opts = mergedOptions()
+    untracked(() => getQueuer().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => queuerSignal().store,
+    () => getQueuer().store,
     (state) => state.isRunning && state.pendingTick,
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => queuerSignal().store, selector, {
+  const state = injectSelector(() => getQueuer().store, selector, {
     compare: shallow,
   })
 

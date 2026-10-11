@@ -11,14 +11,14 @@ import {
 import { injectOutsideZone } from './injectOutsideZone'
 import type { Signal, ValueEqualityFn } from '@angular/core'
 
-interface ExternalBinding<T> {
+export interface ExternalBinding<T> {
   /** Synchronous snapshot. Angular signals read here are tracked dependencies. */
   readonly getSnapshot: () => T
   /** Omit to pause observation; changing eligibility requires a new descriptor. */
   readonly subscribe?: ((notify: () => void) => () => void) | undefined
 }
 
-interface ExternalStoreOptions<T> {
+export interface ExternalStoreOptions<T> {
   /** Snapshot equality, defaulting to Object.is. Does not control connection identity. */
   readonly equal?: ValueEqualityFn<T> | undefined
 }
@@ -51,24 +51,28 @@ export function injectExternalStore<T>(
     assertInInjectionContext(injectExternalStore)
   }
   const owner = inject(DestroyRef)
-  const outsideZone = injectOutsideZone()
+  let destroyed = false
+  owner.onDestroy(() => {
+    destroyed = true
+  })
+  const runOutside = injectOutsideZone()
   const revision = signal(0)
-  const requested = computed(() => outsideZone(binding))
+  const requested = computed(() => runOutside(binding))
   const invalidate = () => untracked(() => revision.update((n) => n + 1))
 
   effect((onCleanup) => {
     // The previous subscription's cleanup may have destroyed the owner.
-    if (owner.destroyed) return
+    if (destroyed) return
     const current = requested()
-    outsideZone(() =>
+    runOutside(() =>
       untracked(() => {
         try {
           const unsubscribe = current.subscribe?.(invalidate)
           if (unsubscribe) {
             // subscribe() can trigger component/injector destruction before returning.
             // Registering cleanup afterward misses that destruction.
-            if (owner.destroyed) unsubscribe()
-            else onCleanup(() => outsideZone(unsubscribe))
+            if (destroyed) unsubscribe()
+            else onCleanup(() => runOutside(unsubscribe))
           }
         } finally {
           // Invalidate after subscribing so an early cached snapshot cannot miss
@@ -82,7 +86,7 @@ export function injectExternalStore<T>(
   return computed(
     () => {
       revision()
-      return outsideZone(() => requested().getSnapshot())
+      return runOutside(() => requested().getSnapshot())
     },
     options?.equal ? { equal: options.equal } : undefined,
   )

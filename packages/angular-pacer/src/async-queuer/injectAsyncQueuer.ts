@@ -10,11 +10,11 @@ import {
 import { injectLazy } from '../utils/injectLazy'
 import { injectSelector } from '../utils/injectSelector'
 import { injectPendingTasksLifecycle } from '../utils/injectPendingTasksLifecycle'
-import type { ReadonlySelected } from '../utils/internalTypes'
 import type { MaybeAccessor } from '../utils/maybeAccessor'
+import type { MethodMap } from '../utils/injectForwardMethods'
+import type { ReadonlySelected } from '../utils/internalTypes'
 import type { Signal } from '@angular/core'
 import type { AsyncQueuerOptions, AsyncQueuerState } from '@tanstack/pacer'
-import type { MethodMap } from '../utils/injectForwardMethods'
 
 /**
  * Options for {@link injectAsyncQueuer}, including core configuration and Angular cleanup.
@@ -127,12 +127,21 @@ export function injectAsyncQueuer<TValue, TSelected>(
     ...optionsSignal(),
   }))
 
-  const asyncQueuerSignal = injectLazy(
+  const getAsyncQueuer = injectLazy(
     () => new AsyncQueuer<TValue>(fn, mergedOptions()),
+    (core) => {
+      const opts = mergedOptions()
+      if (opts.onUnmount) {
+        opts.onUnmount(core)
+      } else {
+        core.stop()
+        core.abort()
+      }
+    },
   )
 
   const methods = injectForwardMethods(
-    asyncQueuerSignal,
+    getAsyncQueuer,
     asyncQueuerMethods,
     (core) => {
       core.setOptions(mergedOptions())
@@ -141,29 +150,16 @@ export function injectAsyncQueuer<TValue, TSelected>(
 
   effect(() => {
     const opts = mergedOptions()
-    untracked(() => asyncQueuerSignal().setOptions(opts))
-  })
-
-  effect((onCleanup) => {
-    const core = asyncQueuerSignal()
-    onCleanup(() => {
-      const opts = untracked(mergedOptions)
-      if (opts.onUnmount) {
-        opts.onUnmount(core)
-      } else {
-        core.stop()
-        core.abort()
-      }
-    })
+    untracked(() => getAsyncQueuer().setOptions(opts))
   })
 
   const hasPendingTasks = injectSelector(
-    () => asyncQueuerSignal().store,
+    () => getAsyncQueuer().store,
     (state) => state.isExecuting || (state.isRunning && state.pendingTick),
   )
   injectPendingTasksLifecycle(hasPendingTasks)
 
-  const state = injectSelector(() => asyncQueuerSignal().store, selector, {
+  const state = injectSelector(() => getAsyncQueuer().store, selector, {
     compare: shallow,
   })
 
