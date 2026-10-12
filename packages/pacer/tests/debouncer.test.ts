@@ -8,6 +8,9 @@ describe('Debouncer', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+
+    vi.clearAllTimers()
+    vi.useRealTimers()
   })
 
   describe('Basic Debouncing', () => {
@@ -388,7 +391,7 @@ describe('Debouncer', () => {
     })
   })
 
-  describe('State Tracking', () => {
+  describe('State Management', () => {
     it('should track execution count', () => {
       const mockFn = vi.fn()
       const debouncer = new Debouncer(mockFn, { wait: 1000 })
@@ -430,6 +433,40 @@ describe('Debouncer', () => {
       vi.advanceTimersByTime(1000)
 
       expect(debouncer.store.state.executionCount).toBe(0)
+    })
+
+    it('should clear isPending after a leading call reaches the end of its wait interval', () => {
+      const fn = vi.fn()
+      const debouncer = new Debouncer(fn, {
+        leading: true,
+        trailing: true,
+        wait: 100,
+      })
+
+      debouncer.maybeExecute('only call')
+      vi.advanceTimersByTime(100)
+
+      expect(fn).toHaveBeenCalledExactlyOnceWith('only call')
+      expect(debouncer.store.state.isPending).toBe(false)
+    })
+
+    it('should not execute a discarded trailing call after reset reports no pending work', () => {
+      const fn = vi.fn()
+      const debouncer = new Debouncer(fn, {
+        leading: false,
+        trailing: true,
+        wait: 100,
+      })
+
+      debouncer.maybeExecute('old call')
+
+      debouncer.reset()
+
+      expect(debouncer.store.state.isPending).toBe(false)
+
+      vi.advanceTimersByTime(100)
+
+      expect(fn).not.toHaveBeenCalled()
     })
   })
 

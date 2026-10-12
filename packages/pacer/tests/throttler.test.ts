@@ -6,6 +6,69 @@ describe('Throttler', () => {
     vi.useFakeTimers()
   })
 
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  })
+
+  describe('State Management', () => {
+    it('should track execution count correctly', () => {
+      const mockFn = vi.fn()
+      const throttler = new Throttler(mockFn, { wait: 100 })
+
+      throttler.maybeExecute()
+      expect(throttler.store.state.executionCount).toBe(1)
+
+      throttler.maybeExecute()
+      expect(throttler.store.state.executionCount).toBe(1)
+
+      vi.advanceTimersByTime(100)
+      expect(throttler.store.state.executionCount).toBe(2)
+    })
+
+    it('should track last execution time correctly', () => {
+      const mockFn = vi.fn()
+      const throttler = new Throttler(mockFn, { wait: 100 })
+
+      // Initial state
+      expect(throttler.store.state.lastExecutionTime).toBe(0)
+
+      // First execution
+      throttler.maybeExecute('first')
+      const firstExecutionTime = throttler.store.state.lastExecutionTime
+      expect(firstExecutionTime).toBeGreaterThan(0)
+
+      // Wait and execute again
+      vi.advanceTimersByTime(100)
+      throttler.maybeExecute('second')
+      const secondExecutionTime = throttler.store.state.lastExecutionTime
+      expect(secondExecutionTime).toBeGreaterThan(firstExecutionTime)
+    })
+
+    it('should start a fresh trailing wait interval after reset', () => {
+      const fn = vi.fn()
+      const throttler = new Throttler(fn, {
+        leading: false,
+        trailing: true,
+        wait: 100,
+      })
+
+      throttler.maybeExecute('old call')
+      vi.advanceTimersByTime(50)
+
+      throttler.reset()
+      throttler.maybeExecute('new call')
+      vi.advanceTimersByTime(50)
+
+      expect(fn).not.toHaveBeenCalled()
+
+      vi.advanceTimersByTime(50)
+
+      expect(fn).toHaveBeenCalledExactlyOnceWith('new call')
+      expect(throttler.store.state.isPending).toBe(false)
+    })
+  })
+
   it('should execute immediately with default options', () => {
     const mockFn = vi.fn()
     const throttler = new Throttler(mockFn, { wait: 100 })
@@ -84,20 +147,6 @@ describe('Throttler', () => {
     expect(mockFn).toHaveBeenLastCalledWith('second')
   })
 
-  it('should track execution count correctly', () => {
-    const mockFn = vi.fn()
-    const throttler = new Throttler(mockFn, { wait: 100 })
-
-    throttler.maybeExecute()
-    expect(throttler.store.state.executionCount).toBe(1)
-
-    throttler.maybeExecute()
-    expect(throttler.store.state.executionCount).toBe(1)
-
-    vi.advanceTimersByTime(100)
-    expect(throttler.store.state.executionCount).toBe(2)
-  })
-
   it('should cancel pending trailing execution', () => {
     const mockFn = vi.fn()
     const throttler = new Throttler(mockFn, { wait: 100 })
@@ -139,25 +188,6 @@ describe('Throttler', () => {
     throttler.maybeExecute('d')
     expect(mockFn).toHaveBeenCalledTimes(3)
     expect(mockFn).toHaveBeenLastCalledWith('d')
-  })
-
-  it('should track last execution time correctly', () => {
-    const mockFn = vi.fn()
-    const throttler = new Throttler(mockFn, { wait: 100 })
-
-    // Initial state
-    expect(throttler.store.state.lastExecutionTime).toBe(0)
-
-    // First execution
-    throttler.maybeExecute('first')
-    const firstExecutionTime = throttler.store.state.lastExecutionTime
-    expect(firstExecutionTime).toBeGreaterThan(0)
-
-    // Wait and execute again
-    vi.advanceTimersByTime(100)
-    throttler.maybeExecute('second')
-    const secondExecutionTime = throttler.store.state.lastExecutionTime
-    expect(secondExecutionTime).toBeGreaterThan(firstExecutionTime)
   })
 
   it('should handle zero wait time correctly', () => {

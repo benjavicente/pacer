@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AsyncBatcher, asyncBatch } from '../src/async-batcher'
+import { createDeferredFactory } from './test-utils'
 
 describe('AsyncBatcher', () => {
   beforeEach(() => {
@@ -8,6 +9,9 @@ describe('AsyncBatcher', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+
+    vi.clearAllTimers()
+    vi.useRealTimers()
   })
 
   describe('State Management', () => {
@@ -120,6 +124,113 @@ describe('AsyncBatcher', () => {
       expect(batcher.store.state.successCount).toBe(0)
       expect(batcher.store.state.failedItems).toEqual([1, 2])
       expect(batcher.store.state.totalItemsFailed).toBe(2)
+    })
+
+    it('should wait for a timer-triggered batch and return its result from addItem', async () => {
+      using deferred = createDeferredFactory('batch result')
+      const execution = deferred()
+      const batcher = new AsyncBatcher(
+        (_items: Array<string>) => execution.promise,
+        { wait: 10 },
+      )
+
+      // Should be setteled with the result.
+      let addItemSettled = false
+      const addItemResult = batcher.addItem('job').then((result) => {
+        addItemSettled = true
+        return result
+      })
+
+      // Start the batch, but leave its result unresolved.
+      await vi.advanceTimersByTimeAsync(10)
+      expect(addItemSettled).toBe(false)
+      // Finish the batch.
+      execution.resolve('batch result')
+      // addItem should return that same result.
+      expect(await addItemResult).toBe('batch result')
+    })
+
+    it('should not let a timer from before reset execute newly queued manual-only items', async () => {
+      const fn = vi.fn(async (_items: Array<string>) => {})
+      const batcher = new AsyncBatcher(fn, { wait: 100 })
+      const first = batcher.addItem('old')
+      await vi.advanceTimersByTimeAsync(50)
+
+      batcher.reset()
+      batcher.setOptions({ wait: Infinity })
+      await batcher.addItem('new')
+      await vi.advanceTimersByTimeAsync(50)
+      await first
+
+      // Initial item should be discarted.
+      expect(fn).not.toHaveBeenCalled()
+      // New item should be in the batch that isn't pending.
+      expect(batcher.store.state.items).toEqual(['new'])
+      expect(batcher.store.state.isPending).toBe(false)
+    })
+
+    it('should abort a newer execution after reset and an older execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const onSuccess = vi.fn()
+      const fn = vi
+        .fn<(_items: Array<string>) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const batcher = new AsyncBatcher(fn, { wait: Infinity, onSuccess })
+
+      batcher.addItem('first')
+      const first = batcher.flush()
+      // Reset the tracked promises, only the second should be tracked.
+      batcher.reset()
+      batcher.addItem('second')
+      const second = batcher.flush()
+
+      expect(fn).toHaveBeenCalledTimes(2)
+
+      // Resolve first one. The effect of this on the test isn't asserted
+      // but not having an earlier first run will not show the issue.
+      firstRun.resolve('first result')
+      await first
+      // Abort the batch, so B should not end up calling onSucess.
+      batcher.abort()
+      secondRun.resolve('second result')
+      await second
+
+      expect(onSuccess.mock.calls.map(([result]) => result)).not.toContain(
+        'second result',
+      )
+    })
+
+    it('should keep isExecuting true until every overlapping execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const fn = vi
+        .fn<(_items: Array<string>) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncBatcher(fn, { wait: Infinity })
+
+      utility.addItem('first')
+      const first = utility.flush()
+      utility.addItem('second')
+      const second = utility.flush()
+
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('second result')
+      await second
+
+      // Even when one batch ended, it still should be executing
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      firstRun.resolve('first result')
+      await first
+
+      expect(utility.store.state.isExecuting).toBe(false)
     })
   })
 

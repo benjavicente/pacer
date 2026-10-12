@@ -9,6 +9,7 @@ import {
 } from 'vitest'
 import { AsyncRateLimiter, asyncRateLimit } from '../src/async-rate-limiter'
 import { getPacerDevtoolsInstance } from '../src'
+import { createDeferredFactory } from './test-utils'
 
 describe('AsyncRateLimiter', () => {
   beforeEach(() => {
@@ -17,6 +18,8 @@ describe('AsyncRateLimiter', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+
+    vi.clearAllTimers()
   })
 
   describe('State Management', () => {
@@ -146,6 +149,88 @@ describe('AsyncRateLimiter', () => {
       await vi.advanceTimersByTimeAsync(100)
       await promise
       expect(rateLimiter.store.state.isExecuting).toBe(false)
+    })
+
+    it('should keep isExecuting true when reset leaves an execution unfinished', async () => {
+      using deferred = createDeferredFactory('finished')
+      const execution = deferred()
+      const utility = new AsyncRateLimiter(
+        (_items: string) => execution.promise,
+        { limit: 10, window: 1000 },
+      )
+
+      const pending = utility.maybeExecute('first')
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      utility.reset()
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      execution.resolve('finished')
+      await pending
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
+
+    it('should abort a newer execution after reset and an older execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const onSuccess = vi.fn()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncRateLimiter(fn, {
+        limit: 10,
+        window: 1000,
+        onSuccess,
+      })
+
+      const first = utility.maybeExecute('first')
+
+      utility.reset()
+      const second = utility.maybeExecute('second')
+
+      expect(fn).toHaveBeenCalledTimes(2)
+
+      firstRun.resolve('first result')
+      await first
+      utility.abort()
+      secondRun.resolve('second result')
+      await second
+
+      expect(onSuccess.mock.calls.map(([result]) => result)).not.toContain(
+        'second result',
+      )
+    })
+
+    it('should keep isExecuting true until every overlapping execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncRateLimiter(fn, { limit: 10, window: 1000 })
+
+      const first = utility.maybeExecute('first')
+      const second = utility.maybeExecute('second')
+
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('second result')
+      await second
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      firstRun.resolve('first result')
+      await first
+
+      expect(utility.store.state.isExecuting).toBe(false)
     })
   })
 

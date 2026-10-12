@@ -8,6 +8,9 @@ describe('Batcher', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+
+    vi.clearAllTimers()
+    vi.useRealTimers()
   })
 
   describe('State Management', () => {
@@ -75,6 +78,24 @@ describe('Batcher', () => {
 
       expect(batcher.store.state.executionCount).toBe(1)
       expect(batcher.store.state.totalItemsProcessed).toBe(2)
+    })
+
+    it('should not let a timer from before reset execute newly queued manual-only items', async () => {
+      const fn = vi.fn((_items: Array<string>) => {})
+      const batcher = new Batcher(fn, { wait: 100 })
+
+      batcher.addItem('old')
+      await vi.advanceTimersByTimeAsync(50)
+
+      batcher.reset()
+      batcher.setOptions({ wait: Infinity })
+      batcher.addItem('new')
+
+      expect(batcher.store.state.isPending).toBe(false)
+
+      await vi.advanceTimersByTimeAsync(50)
+
+      expect(fn).not.toHaveBeenCalled()
     })
   })
 

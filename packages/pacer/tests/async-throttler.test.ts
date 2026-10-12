@@ -9,10 +9,135 @@ import {
 } from 'vitest'
 import { AsyncThrottler } from '../src/async-throttler'
 import { getPacerDevtoolsInstance } from '../src'
+import { createDeferredFactory } from './test-utils'
 
 describe('AsyncThrottler', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  })
+
+  describe('State Management', () => {
+    it('should track execution count correctly', async () => {
+      const mockFn = vi.fn().mockResolvedValue(undefined)
+      const throttler = new AsyncThrottler(mockFn, { wait: 100 })
+
+      await throttler.maybeExecute()
+      expect(throttler.store.state.successCount).toBe(1)
+
+      const promise = throttler.maybeExecute()
+      expect(throttler.store.state.successCount).toBe(1)
+
+      vi.advanceTimersByTime(100)
+      await promise
+      expect(throttler.store.state.successCount).toBe(2)
+    })
+
+    it('should update nextExecutionTime after each execution', async () => {
+      const mockFn = vi.fn().mockResolvedValue(undefined)
+      const throttler = new AsyncThrottler(mockFn, { wait: 100 })
+
+      const now = Date.now()
+      await throttler.maybeExecute()
+
+      expect(throttler.store.state.nextExecutionTime).toBe(now + 100)
+
+      vi.advanceTimersByTime(100)
+      await throttler.maybeExecute()
+
+      expect(throttler.store.state.nextExecutionTime).toBe(now + 200)
+    })
+
+    it('should keep isExecuting true when reset leaves an execution unfinished', async () => {
+      using deferred = createDeferredFactory('finished')
+      const execution = deferred()
+      const utility = new AsyncThrottler(
+        (_items: string) => execution.promise,
+        { leading: true, trailing: false, wait: 0 },
+      )
+
+      const pending = utility.maybeExecute('first')
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      utility.reset()
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      execution.resolve('finished')
+      await pending
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
+
+    it('should abort a newer execution after reset and an older execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const onSuccess = vi.fn()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncThrottler(fn, {
+        leading: true,
+        trailing: false,
+        wait: 0,
+        onSuccess,
+      })
+
+      const first = utility.maybeExecute('first')
+
+      utility.reset()
+      const second = utility.maybeExecute('second')
+
+      expect(fn).toHaveBeenCalledTimes(2)
+
+      firstRun.resolve('first result')
+      await first
+      utility.abort()
+      secondRun.resolve('second result')
+      await second
+
+      expect(onSuccess.mock.calls.map(([result]) => result)).not.toContain(
+        'second result',
+      )
+    })
+
+    it('should keep isExecuting true until every overlapping execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncThrottler(fn, {
+        leading: true,
+        trailing: false,
+        wait: 0,
+      })
+
+      const first = utility.maybeExecute('first')
+      const second = utility.maybeExecute('second')
+
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('second result')
+      await second
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      firstRun.resolve('first result')
+      await first
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
   })
 
   it('should execute immediately on first call', async () => {
@@ -96,21 +221,6 @@ describe('AsyncThrottler', () => {
     expect(mockFn).toHaveBeenLastCalledWith('second')
   })
 
-  it('should track execution count correctly', async () => {
-    const mockFn = vi.fn().mockResolvedValue(undefined)
-    const throttler = new AsyncThrottler(mockFn, { wait: 100 })
-
-    await throttler.maybeExecute()
-    expect(throttler.store.state.successCount).toBe(1)
-
-    const promise = throttler.maybeExecute()
-    expect(throttler.store.state.successCount).toBe(1)
-
-    vi.advanceTimersByTime(100)
-    await promise
-    expect(throttler.store.state.successCount).toBe(2)
-  })
-
   it('should handle errors with onError callback', async () => {
     const error = new Error('Test error')
     const mockFn = vi.fn().mockRejectedValue(error)
@@ -167,21 +277,6 @@ describe('AsyncThrottler', () => {
     await throttler.maybeExecute('c')
     expect(mockFn).toHaveBeenCalledTimes(3)
     expect(mockFn).toHaveBeenLastCalledWith('c')
-  })
-
-  it('should update nextExecutionTime after each execution', async () => {
-    const mockFn = vi.fn().mockResolvedValue(undefined)
-    const throttler = new AsyncThrottler(mockFn, { wait: 100 })
-
-    const now = Date.now()
-    await throttler.maybeExecute()
-
-    expect(throttler.store.state.nextExecutionTime).toBe(now + 100)
-
-    vi.advanceTimersByTime(100)
-    await throttler.maybeExecute()
-
-    expect(throttler.store.state.nextExecutionTime).toBe(now + 200)
   })
 
   it('should handle basic throttling behavior correctly', async () => {

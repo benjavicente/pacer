@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AsyncQueuer, getPacerDevtoolsInstance } from '../src'
+import { createDeferredFactory } from './test-utils'
 
 describe('AsyncQueuer', () => {
   beforeEach(() => {
@@ -7,35 +8,122 @@ describe('AsyncQueuer', () => {
   })
   afterEach(() => {
     vi.useRealTimers()
+
+    vi.clearAllTimers()
   })
 
-  it('should create an empty async queuer and be started by default', () => {
-    const asyncQueuer = new AsyncQueuer((item) => Promise.resolve(item), {})
-    expect(asyncQueuer.store.state.isRunning).toBe(true)
-    expect(asyncQueuer.store.state.isIdle).toBe(true)
-    expect(asyncQueuer.store.state.items.length).toBe(0)
-  })
-
-  it('should respect started option', () => {
-    const asyncQueuer = new AsyncQueuer((item) => Promise.resolve(item), {
-      started: false,
+  describe('State Management', () => {
+    it('should create an empty async queuer and be started by default', () => {
+      const asyncQueuer = new AsyncQueuer((item) => Promise.resolve(item), {})
+      expect(asyncQueuer.store.state.isRunning).toBe(true)
+      expect(asyncQueuer.store.state.isIdle).toBe(true)
+      expect(asyncQueuer.store.state.items.length).toBe(0)
     })
-    expect(asyncQueuer.store.state.isRunning).toBe(false)
-    expect(asyncQueuer.store.state.isIdle).toBe(false)
-  })
 
-  it('should respect maxSize option', () => {
-    const asyncQueuer = new AsyncQueuer<string>(
-      (item) => Promise.resolve(item),
-      {
-        maxSize: 1,
+    it('should respect started option', () => {
+      const asyncQueuer = new AsyncQueuer((item) => Promise.resolve(item), {
         started: false,
-      },
-    )
-    expect(asyncQueuer.store.state.items.length).toBe(0)
-    asyncQueuer.addItem('test')
-    expect(asyncQueuer.store.state.items.length).toBe(1)
-    expect(asyncQueuer.store.state.isFull).toBe(true)
+      })
+      expect(asyncQueuer.store.state.isRunning).toBe(false)
+      expect(asyncQueuer.store.state.isIdle).toBe(false)
+    })
+
+    it('should respect maxSize option', () => {
+      const asyncQueuer = new AsyncQueuer<string>(
+        (item) => Promise.resolve(item),
+        {
+          maxSize: 1,
+          started: false,
+        },
+      )
+      expect(asyncQueuer.store.state.items.length).toBe(0)
+      asyncQueuer.addItem('test')
+      expect(asyncQueuer.store.state.items.length).toBe(1)
+      expect(asyncQueuer.store.state.isFull).toBe(true)
+    })
+
+    it('should keep isExecuting true when reset leaves an execution unfinished', async () => {
+      using deferred = createDeferredFactory('finished')
+      const execution = deferred()
+      const utility = new AsyncQueuer((_items: string) => execution.promise, {
+        started: false,
+      })
+
+      utility.addItem('first')
+      const pending = utility.execute()
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      utility.reset()
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      execution.resolve('finished')
+      await pending
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
+
+    it('should abort a newer execution after reset and an older execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const onSuccess = vi.fn()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncQueuer(fn, { started: false, onSuccess })
+
+      utility.addItem('first')
+      const first = utility.execute()
+
+      utility.reset()
+      utility.stop()
+      utility.addItem('second')
+      const second = utility.execute()
+
+      expect(fn).toHaveBeenCalledTimes(2)
+
+      firstRun.resolve('first result')
+      await first
+      utility.abort()
+      secondRun.resolve('second result')
+      await second
+
+      expect(onSuccess.mock.calls.map(([result]) => result)).not.toContain(
+        'second result',
+      )
+    })
+
+    it('should keep isExecuting true until every overlapping execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncQueuer(fn, { started: false })
+
+      utility.addItem('first')
+      const first = utility.execute()
+      utility.addItem('second')
+      const second = utility.execute()
+
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('second result')
+      await second
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      firstRun.resolve('first result')
+      await first
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
   })
 
   describe('addItem', () => {
@@ -1004,6 +1092,26 @@ describe('AsyncQueuer', () => {
     })
 
     describe('flushAsBatch', () => {
+      it('should report executing until a stopped queue batch flush settles', async () => {
+        using deferred = createDeferredFactory<void>(undefined)
+        const execution = deferred()
+        const batchFn = vi.fn((_items: Array<string>) => execution.promise)
+        const asyncQueuer = new AsyncQueuer<string>(async (item) => item, {
+          started: false,
+        })
+        asyncQueuer.addItem('job')
+
+        const pending = asyncQueuer.flushAsBatch(batchFn)
+
+        expect(batchFn).toHaveBeenCalledExactlyOnceWith(['job'])
+        expect(asyncQueuer.store.state.isExecuting).toBe(true)
+
+        execution.resolve()
+        await pending
+
+        expect(asyncQueuer.store.state.isExecuting).toBe(false)
+      })
+
       it('should process all items as a batch', async () => {
         const fn = vi.fn().mockResolvedValue('result')
         const batchFn = vi.fn().mockResolvedValue('batch-result')

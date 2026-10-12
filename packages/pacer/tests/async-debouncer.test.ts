@@ -9,6 +9,7 @@ import {
 } from 'vitest'
 import { AsyncDebouncer, asyncDebounce } from '../src/async-debouncer'
 import { getPacerDevtoolsInstance } from '../src'
+import { createDeferredFactory } from './test-utils'
 
 describe('AsyncDebouncer', () => {
   beforeEach(() => {
@@ -17,6 +18,140 @@ describe('AsyncDebouncer', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+
+    vi.clearAllTimers()
+    vi.useRealTimers()
+  })
+
+  describe('State Management', () => {
+    it('should preserve newer trailing work when an earlier execution settles', async () => {
+      using deferred = createDeferredFactory('first result')
+      const firstRun = deferred()
+      const fn = vi.fn((value: string) =>
+        value === 'first' ? firstRun.promise : Promise.resolve(value),
+      )
+      const debouncer = new AsyncDebouncer(fn, {
+        leading: true,
+        trailing: true,
+        wait: 100,
+      })
+
+      const first = debouncer.maybeExecute('first')
+      const second = debouncer.maybeExecute('second')
+      firstRun.resolve('first result')
+      await first
+      await vi.advanceTimersByTimeAsync(100)
+      await second
+
+      expect(fn).toHaveBeenCalledWith('second')
+    })
+
+    it('should expose the abort signal for the currently executing call', async () => {
+      using deferred = createDeferredFactory(undefined)
+      const execution = deferred()
+      const fn = vi.fn(() => execution.promise)
+      const debouncer = new AsyncDebouncer(fn, {
+        leading: true,
+        trailing: false,
+        wait: 10,
+      })
+
+      const pending = debouncer.maybeExecute()
+
+      expect(fn).toHaveBeenCalledTimes(1)
+      expect(debouncer.getAbortSignal()).not.toBeNull()
+
+      execution.resolve(undefined)
+      await pending
+    })
+
+    it('should keep isExecuting true when reset leaves an execution unfinished', async () => {
+      using deferred = createDeferredFactory('finished')
+      const execution = deferred()
+      const utility = new AsyncDebouncer(
+        (_items: string) => execution.promise,
+        { leading: true, trailing: false, wait: 10 },
+      )
+
+      const pending = utility.maybeExecute('first')
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      utility.reset()
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      execution.resolve('finished')
+      await pending
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
+
+    it('should abort a newer execution after reset and an older execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const onSuccess = vi.fn()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncDebouncer(fn, {
+        leading: true,
+        trailing: false,
+        wait: 10,
+        onSuccess,
+      })
+
+      const first = utility.maybeExecute('first')
+
+      utility.reset()
+      const second = utility.maybeExecute('second')
+
+      expect(fn).toHaveBeenCalledTimes(2)
+
+      firstRun.resolve('first result')
+      await first
+      utility.abort()
+      secondRun.resolve('second result')
+      await second
+
+      expect(onSuccess.mock.calls.map(([result]) => result)).not.toContain(
+        'second result',
+      )
+    })
+
+    it('should keep isExecuting true until every overlapping execution settles', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const fn = vi
+        .fn<(_items: string) => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const utility = new AsyncDebouncer(fn, {
+        leading: true,
+        trailing: true,
+        wait: 10,
+      })
+
+      const first = utility.maybeExecute('first')
+      const second = utility.maybeExecute('second')
+      vi.advanceTimersByTime(10)
+
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('second result')
+      await second
+
+      expect(utility.store.state.isExecuting).toBe(true)
+
+      firstRun.resolve('first result')
+      await first
+
+      expect(utility.store.state.isExecuting).toBe(false)
+    })
   })
 
   describe('Basic Async Debouncing', () => {

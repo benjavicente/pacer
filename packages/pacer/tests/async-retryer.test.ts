@@ -1,10 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AsyncRetryer, asyncRetry } from '../src/async-retryer'
 import { getPacerDevtoolsInstance } from '../src'
+import { createDeferredFactory } from './test-utils'
 
 describe('AsyncRetryer', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.clearAllTimers()
+    vi.useRealTimers()
   })
 
   describe('Constructor and Defaults', () => {
@@ -450,6 +456,80 @@ describe('AsyncRetryer', () => {
       const result = await retryer.execute()
       expect(result).toBeUndefined()
       expect(mockFn).not.toHaveBeenCalled()
+    })
+
+    it('should not let a replaced execution failure mark the newer execution idle', async () => {
+      using deferred = createDeferredFactory('finished')
+      const firstRun = deferred()
+      const secondRun = deferred()
+      const fn = vi
+        .fn<() => Promise<string>>()
+        .mockReturnValueOnce(firstRun.promise)
+        .mockReturnValueOnce(secondRun.promise)
+      const retryer = new AsyncRetryer(fn, {
+        maxAttempts: 1,
+        throwOnError: false,
+      })
+
+      const first = retryer.execute()
+
+      const second = retryer.execute()
+      firstRun.reject(new Error('old execution failed'))
+      await first
+
+      expect(retryer.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('finished')
+      await second
+    })
+
+    it('should not let a completed execution timeout abort a newer execution', async () => {
+      using deferred = createDeferredFactory('second result')
+      const secondRun = deferred()
+      const onAbort = vi.fn()
+      const fn = vi
+        .fn<() => Promise<string>>()
+        .mockResolvedValueOnce('first result')
+        .mockReturnValueOnce(secondRun.promise)
+      const retryer = new AsyncRetryer(fn, {
+        maxAttempts: 1,
+        maxTotalExecutionTime: 100,
+        onAbort,
+      })
+
+      await retryer.execute()
+      await vi.advanceTimersByTimeAsync(50)
+
+      const second = retryer.execute()
+      onAbort.mockClear()
+      await vi.advanceTimersByTimeAsync(50)
+
+      expect(onAbort).not.toHaveBeenCalled()
+      expect(retryer.store.state.isExecuting).toBe(true)
+
+      secondRun.resolve('second result')
+      await second
+    })
+
+    it('should keep isExecuting true when reset leaves an execution unfinished', async () => {
+      using deferred = createDeferredFactory(undefined)
+      const execution = deferred()
+      const retryer = new AsyncRetryer(() => execution.promise, {
+        maxAttempts: 1,
+      })
+
+      const pending = retryer.execute()
+
+      expect(retryer.store.state.isExecuting).toBe(true)
+
+      retryer.reset()
+
+      expect(retryer.store.state.isExecuting).toBe(true)
+
+      execution.resolve(undefined)
+      await pending
+
+      expect(retryer.store.state.isExecuting).toBe(false)
     })
   })
 
